@@ -5,11 +5,20 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var exphbs  = require('express-handlebars');
+var mongoose = require('mongoose');
+var passport = require('passport');
+var expressValidator = require('express-validator');
+var session = require('express-session');
+var flash = require('connect-flash');
+
 
 var index = require('./routes/index');
 var users = require('./routes/users');
+var admin = require('./routes/admin');
 
 var app = express();
+require('./configs/admin-passport');
+mongoose.connect('mongodb://localhost:27017/blog');
 
 // view engine setup
 app.engine('.hbs', exphbs({defaultLayout: 'layout', extname: '.hbs'}));
@@ -22,9 +31,20 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({
+    secret: 'keyboard cat adas55asdasd45asd_asdad',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 180 * 60 *1000 }
+}));
+app.use(flash());
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(expressValidator());
 
 app.use('/', index);
 app.use('/users', users);
+app.use('/admin', admin);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -41,7 +61,7 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.render('error', {layout: false});
 });
 
 module.exports = app;
