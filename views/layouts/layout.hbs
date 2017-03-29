@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{title}}</title>
+    <link rel='stylesheet' href='/stylesheets/bootstrap.min.css'/>
+    <link rel='stylesheet' href='/stylesheets/bootstrap-rtl.min.css'/>
+    <link rel='stylesheet' href='/stylesheets/font-awesome.min.css'/>
+    <link rel='stylesheet' href='/stylesheets/style.css'/>
+</head>
+<body>
+    {{>header}}
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-3">
+                <form action="/search" method="get" class="list-group input-group">
+                    <span class="input-group-btn">
+                        <button class="btn btn-primary">جستجو</button>
+                    </span>
+                    <input type="text" class="form-control" placeholder="جستجو ...">
+                </form>
+                <div class="list-group">
+                    <a href="#" class="list-group-item list-group-item-success">
+                        <span class="fa fa-telegram"></span> عضویت در کانال تلگرام
+                    </a>
+                </div>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">دسته بندی ها</div>
+                    <div class="list-group">
+                        <a href="#" class="list-group-item">آموزشی</a>
+                        <a href="#" class="list-group-item">دیدنی</a>
+                        <a href="#" class="list-group-item">دیدنی</a>
+                        <a href="#" class="list-group-item">دیدنی</a>
+                        <a href="#" class="list-group-item">دیدنی</a>
+                        <a href="#" class="list-group-item">دیدنی</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">{{{body}}}</div>
+            <div class="col-sm-3">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">تبلیغات</div>
+                    <img style="padding: 5px;" class="img-responsive" src="http://rozup.ir/up/emtab/Other/View/(BioMarshal.ir)-6.jpg" alt="">
+                </div>
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">محبوب ترین ها</a></li>
+                    <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">پر بازدیدترین ها</a></li>
+                </ul>
+
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <div style="padding: 10px;" role="tabpanel" class="tab-pane active" id="home">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Cumque delectus sunt voluptas voluptate! Aliquid debitis dolorem enim incidunt laudantium modi natus neque non, qui quia reprehenderit suscipit totam veniam voluptates?
+                    </div>
+                    <div  style="padding: 10px;" role="tabpanel" class="tab-pane" id="profile">
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. A exercitationem iure nesciunt perferendis sapiente temporibus? Dolore, omnis voluptatum. Atque culpa deleniti id nulla pariatur perferendis quas qui recusandae velit voluptates.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+
+    </div>
+    <script src="/javascripts/jquery-2.2.4.js"></script>
+    <script src="/javascripts/bootstrap.min.js"></script>
+</body>
+</html>
