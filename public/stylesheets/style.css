@@ -25,7 +25,13 @@ body{
 
 .posts p {
     color: #777777;
-    font-size: 12px;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.posts h3 {
+    font-size: 17px;
+    line-height: 1;
 }
 
 .posts a{
@@ -38,9 +44,9 @@ body{
 }
 
 .panel-tabs >li >a{
-    color: #eee;
+    color: #777;
 }
 
 .panel-tabs >li >a:hover{
-    color: #777;
+    color: #eee;
 }

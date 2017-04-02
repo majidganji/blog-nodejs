@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{title}}</title>
+    <link rel='stylesheet' href='/stylesheets/bootstrap.min.css'/>
+    <link rel='stylesheet' href='/stylesheets/bootstrap-rtl.min.css'/>
+    <link rel='stylesheet' href='/stylesheets/font-awesome.min.css'/>
+    <link rel='stylesheet' href='/stylesheets/dashboard.css'/>
+    <link rel='stylesheet' href='/stylesheets/style.css'/>
+    <script src="/javascripts/jquery-2.2.4.js"></script>
+</head>
+<body>
+{{> header-dashboard }}
+<div class="container">
+{{#if danger}}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="alert alert-danger">
+                {{ danger }}
+            </div>
+        </div>
+    </div>
+{{/if}}
+{{#if success}}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="alert alert-success">
+                {{ success }}
+            </div>
+        </div>
+    </div>
+{{/if}}
+<div class="row">
+    <div class="col-sm-3 ">
+        <div class="list-group">
+            <a href="/dashboard/new-post" class="list-group-item"><span class="pull-left fa fa-angle-left"></span> مطلب جدید</a>
+            <a href="/dashboard/posts" class="list-group-item"><span class="pull-left fa fa-angle-left"></span>مدیریت مطالب</a>
+            <a href="/dashboard/posts" class="list-group-item"><span class="pull-left fa fa-angle-left"></span> مدیریت نظرات</a>
+            <a href="/dashboard/posts" class="list-group-item"><span class="pull-left fa fa-angle-left"></span>مدیریت کاربران</a>
+            <a href="/dashboard/posts" class="list-group-item"><span class="pull-left fa fa-angle-left"></span> مدیریت صفحات</a>
+            <a href="/dashboard/posts" class="list-group-item"><span class="pull-left fa fa-angle-left"></span> log</a>
+        </div>
+    </div>
+    <div class="col-sm-9">
+        {{{body}}}
+    </div>
+</div>
+</div>
+
+<script src="/javascripts/bootstrap.min.js"></script>
+</body>
+</html>

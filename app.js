@@ -15,6 +15,7 @@ var flash = require('connect-flash');
 var index = require('./routes/index');
 var users = require('./routes/users');
 var admin = require('./routes/admin');
+var dashboard = require('./routes/dashboard');
 
 var app = express();
 require('./configs/admin-passport');
@@ -42,9 +43,16 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(expressValidator());
 
+app.use(function (req, res, next) {
+    res.locals.danger = req.flash('danger');
+    res.locals.success = req.flash('success');
+    next();
+});
+
 app.use('/', index);
 app.use('/users', users);
 app.use('/admin', admin);
+app.use('/dashboard', dashboard);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -61,7 +69,7 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error', {layout: false});
+  res.render('error', {layout: '404'});
 });
 
 module.exports = app;

@@ -1,0 +1,17 @@
+{{#if post}}
+<div class="row">
+    <div class="col-xs-12 posts">
+        <div class="thumbnail">
+            <img src="/images/uploads/{{post.image}}" alt="{{this.title}}">
+            <div class="caption">
+                <a href="/post/{{post.slug}}"><h3>{{post.title}}</h3></a>
+                <p>{{{post.body}}}</p>
+                <p>
+                    <strong>نویسنده:</strong> {{editor}}،
+                    <strong>تاریخ:</strong> {{date}}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{{/if}}

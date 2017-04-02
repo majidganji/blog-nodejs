@@ -9,7 +9,7 @@ var csrfProtection = csrf({ cookie: true });
 router.use(function (req, res, next) {
     req.app.locals.layout = 'admin';
     if (req.url !== '/logout' && req.isAuthenticated()){
-        res.redirect('/dashbord/index');
+        res.redirect('/dashboard/index');
         return;
     }
     next();
@@ -28,10 +28,16 @@ router.get('/login', function (req, res, next) {
 });
 
 router.post('/login', passport.authenticate('local.login', {
-    successRedirect: '/dashbord/index',
     failureRedirect: '/admin/login',
     failureFlash: true
-}));
+}), function (req, res, next) {
+    var backUrl = req.flash('backUrl');
+    if(backUrl){
+        res.redirect(backUrl);
+    }else{
+        res.redirect('/dashboard/index');
+    }
+});
 
 router.get('/signup', function (req, res, next) {
     res.render('admin/signup', {csrfToken: req.csrfToken()});
