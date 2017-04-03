@@ -129,3 +129,5 @@ fabric.properties
 .idea/sonarlint
 
 # End of https://www.gitignore.io/api/linux,phpstorm,expressionengine
+public/images/uploads/*
+!public/images/uploads/.gitkeep

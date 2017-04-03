@@ -22,8 +22,8 @@
             </thead>
             <tbody>
                 {{#each posts}}
-                    <tr>
-                        <td>
+                    <tr class="row-post">
+                        <td class="index-row-posts">
                             {{index @index}}
                         </td>
                         <td>{{this.title}}</td>
@@ -32,7 +32,7 @@
                         </td>
                         <td>{{this.status}}</td>
                         <td>
-                            <a href="/dashboard/post-delete/{{this.id}}" class="text-danger" onclick="return confirm('آیا حذف شود؟')"><span class="fa fa-trash"></span></a>
+                            <a href="/dashboard/post-delete/{{this.id}}" class="delete-post text-danger"><span class="fa fa-trash"></span></a>
                             <a href="/dashboard/post-edit/{{this.id}}" class="text-warning"><span class="fa fa-edit"></span></a>
                             <a href="/post/{{this.slug}}" class="text-info"><span class="fa fa-eye"></span></a>
                         </td>
@@ -43,7 +43,35 @@
     </div>
 </div>
 <script>
-
+    $('.delete-post').on('click', function (event) {
+       event.preventDefault();
+       var confirm = window.confirm('آیا حذف شود؟');
+       if (!confirm){
+           return false;
+       }
+       var $this = $(this);
+       var url = $this.attr('href');
+       $.ajax({
+           url: url,
+           type: 'get',
+           cache: false,
+           success: function (result) {
+               if(result){
+                   var row = $this.parent().parent();
+                   var nextAll = row.nextAll();
+                   var count = row.siblings().size();
+                   if (count < 1){
+                       location.reload();
+                   }
+                   row.remove();
+                   nextAll.each(function (index) {
+                      var td = $(this).children('.index-row-posts');
+                      td.text(td.text() - 1);
+                   });
+               }
+           }
+       });
+    });
 </script>
 
 {{else}}

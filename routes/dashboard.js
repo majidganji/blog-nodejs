@@ -99,7 +99,6 @@ router.post('/new-post', upload.single('image'), function (req, res, next) {
 
 router.get('/posts', function (req, res, next) {
     Post.find().populate('user_id').sort({'_id': 'descending'}).exec(function (err, posts) {
-        console.log(posts);
         res.render('dashboard/posts', {
             posts: posts,
             title: 'مطالب',
@@ -109,6 +108,17 @@ router.get('/posts', function (req, res, next) {
                 }
             }
         });
+    });
+});
+
+router.get('/post-delete/:postId', function (req, res, next) {
+    Post.findByIdAndRemove(req.params.postId, function (err, offer) {
+        if (err){
+            res.send(false);
+        }else{
+            fs.unlinkSync('public/images/uploads/' + offer.image);
+            res.send(true);
+        }
     });
 });
 
