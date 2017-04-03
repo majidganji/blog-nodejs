@@ -5,7 +5,6 @@ var Post = require('../models/post');
 var path = require('path');
 var fs = require('fs');
 
-
 var router = express.Router();
 
 router.use(function (req, res, next) {
@@ -96,6 +95,21 @@ router.post('/new-post', upload.single('image'), function (req, res, next) {
         }
     });
 
+});
+
+router.get('/posts', function (req, res, next) {
+    Post.find().populate('user_id').sort({'_id': 'descending'}).exec(function (err, posts) {
+        console.log(posts);
+        res.render('dashboard/posts', {
+            posts: posts,
+            title: 'مطالب',
+            helpers: {
+                index: function (index) {
+                    return ++index;
+                }
+            }
+        });
+    });
 });
 
 module.exports = router;

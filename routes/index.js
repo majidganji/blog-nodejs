@@ -11,12 +11,11 @@ router.use(function (req, res, next) {
 });
 
 router.get('/', function(req, res, next) {
-    var posts = Post.find().sort({'_id': 'descending'}).exec(function (err, posts) {
+    Post.find().sort({'_id': 'descending'}).exec(function (err, posts) {
         if (err){
 
         }
-        console.log(posts);
-        res.render('index/index', { title: 'Movie', posts: posts});
+        res.render('index/index', { title: 'Blog', posts: posts});
     });
 });
 
@@ -32,8 +31,7 @@ router.get('/post/:slug', function (req, res, next) {
             return;
         }
         Admin.findById(post.user_id, function (err, admin) {
-           console.log(admin);
-           var createDate = moment(post.created_at).format('jYYYY/jMM/jDD - HH:mm');
+            var createDate = moment(post.created_at).format('jYYYY/jMM/jDD - HH:mm');
             res.render('index/post', {post: post, title: post.title, editor: admin.name, date: createDate});
         });
     });

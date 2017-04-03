@@ -32,7 +32,7 @@ router.post('/login', passport.authenticate('local.login', {
     failureFlash: true
 }), function (req, res, next) {
     var backUrl = req.flash('backUrl');
-    if(backUrl){
+    if(backUrl.length > 0){
         res.redirect(backUrl);
     }else{
         res.redirect('/dashboard/index');
