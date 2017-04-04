@@ -25,7 +25,7 @@ var upload = multer({
         return  fieldname + filename + Date.now();
     }
 });
-
+//TODO: csrf error ..........................
 var csrfProtection = csrf({ cookie: true });
 // router.use(csrfProtection);
 
@@ -90,7 +90,7 @@ router.post('/new-post', upload.single('image'), function (req, res, next) {
                 }else{
                     req.flash('success', 'با موفقیت ذخیره شد');
                 }
-                res.redirect('/dashboard/index');
+                res.redirect('/dashboard/posts');
             });
         }
     });
@@ -122,6 +122,58 @@ router.get('/post-delete/:postId', function (req, res, next) {
     });
 });
 
+router.get('/post-edit/:postId', function (req, res, next) {
+    Post.findById(req.params.postId, function (err, data) {
+       if (err){
+            req.flash('danger', 'خطا لطفا دوباره تلاش کنید.');
+            res.redirect('/dashboard/posts');
+       }
+        res.render('dashboard/edit', {post: data, title: 'ویرایش' + data.title, csrfToken: 'sad'});
+    });
+});
+
+router.post('/post-edit/:postId', upload.single('image'), function (req, res, next) {
+    Post.findById(req.params.postId, function (err, data) {
+        if (err){
+
+        }
+        if (!data){
+
+        }
+        var messages = validateEditPost(req, res, data);
+        var oldImage = 'public/images/uploads/' + data.image;
+        data.user_id = req.user.id;
+        data.title = req.body.title;
+        data.slug = req.body.slug;
+        data.body = req.body.body;
+        data.updated_at = Date.now();
+        console.log(messages);
+        if (messages.length > 0){
+            //TODO: csrf Token
+            return res.render('dashboard/edit', {post: data, title: 'ویرایش' + data.title, csrfToken: 'sad', hasError: messages.length > 0, message: messages})
+        }else{
+            if (req.file){
+                data.image = req.file.filename;
+            }
+            data.save(function (err, post) {
+                if (err){
+                    if (req.file){
+                        fs.unlinkSync(req.file.path);
+                    }
+                    messages.push('مسیر نمی تواند تکراری باشد.');
+                    return res.render('dashboard/edit', {post: data, title: 'ویرایش' + data.title, csrfToken: 'sad', hasError: messages.length > 0, message: messages})
+                }else{
+                    if(req.file){
+                        fs.unlinkSync(oldImage);
+                    }
+                    req.flash('success', 'با موفقیت ذخیره شد');
+                }
+                res.redirect('/dashboard/posts');
+            });
+        }
+    });
+});
+
 module.exports = router;
 
 function fileFilter (req, file, cb) {
@@ -132,4 +184,17 @@ function fileFilter (req, file, cb) {
         return cb(null, true);
     }
     cb(null, false);
+}
+function validateEditPost(req, res, post){
+    var messages = [];
+    req.checkBody('title').notEmpty().withMessage('عنوان نمی تواند خالی باشد.');
+    req.checkBody('slug').notEmpty().withMessage('مسیر نمی تواند خالی باشد.');
+    req.checkBody('body').notEmpty().withMessage('متن نمی تواند خالی باشد.');
+    var errors = req.validationErrors();
+    if (errors){
+        errors.forEach(function (item) {
+            messages.push(item.msg);
+        });
+    }
+    return messages;
 }
