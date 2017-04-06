@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var Post = require('../models/post');
 var Admin = require('../models/admin');
+var comment = require('../models/comment');
 var moment = require('moment-jalaali');
 
 
@@ -20,7 +21,7 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/post/:slug', function (req, res, next) {
-    Post.findOne({slug: req.params.slug}, function (err, post) {
+    Post.findOne({slug: req.params.slug}).populate('user_id').exec(function (err, post) {
         if (err){
             console.log(err);
             return;
@@ -30,11 +31,56 @@ router.get('/post/:slug', function (req, res, next) {
             res.render('error',{error: {status: 404, stack: 'Not Found ' + req.params.slug}, message: 'Not Found Post', layout: '404'});
             return;
         }
-        Admin.findById(post.user_id, function (err, admin) {
-            var createDate = moment(post.created_at).format('jYYYY/jMM/jDD - HH:mm');
-            res.render('index/post', {post: post, title: post.title, editor: admin.name, date: createDate});
+        comment.find({post_id: post._id}).exec(function (err, comments) {
+            //TODO: handel error ...
+            if (err){}
+            res.render('index/post', {
+                post: post,
+                title: post.title,
+                helpers: {
+                    date: function (date) {
+                        return moment(date).format('jYYYY/jMM/jDD - HH:mm');
+                    },
+                    year: function (date) {
+                        return moment(date).format('jYYYY/jMM/jDD');
+                    },
+                    time: function (date) {
+                        return moment(date).format('HH:mm');
+                    },
+                    hasChild: function () {
+                        comment.find({parent_id: data}, function (err, comments) {
+                            if (comments){
+                                return true;
+                            }
+                        });
+                    }
+                },
+                commants: comments
+            });
         });
     });
+});
+
+router.post('/new-comment', function (req, res, next) {
+    console.log(req.body);
+    var Commnet = new comment({
+        post_id: req.body.post_id,
+        parent_id: req.body.parent_id || null ,
+        name: req.body.name,
+        email: req.body.email,
+        body: req.body.comment,
+        time: +Date.now()
+    });
+
+    var errors = Commnet.validateSync();
+    if(errors){
+        return res.redirect(req.header('Referer') || '/');
+    }
+    Commnet.save(function (err, data) {
+        //TODO: hendle error ...
+        if (err){}
+        res.send(true);
+    })
 });
 
 module.exports = router;
