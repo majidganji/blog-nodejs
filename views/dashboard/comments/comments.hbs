@@ -1,0 +1,42 @@
+<div class="row">
+    <div class="col-sm-12">
+        <h3>مدیریت نظرات</h3>
+        <hr>
+        <p>
+            <a href="/comments/search" class="btn btn-default">جستجو</a>
+        </p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12">
+        <table class="table-responsive table table-bordered">
+            <thead>
+                <tr>
+                    <th>&nbsp;</th>
+                    <th>نام</th>
+                    <th>ایمیل</th>
+                    <th>مطلب</th>
+                    <th>مشاهده</th>
+                    <th class="col-sm-1"><span class="fa fa-gear"></span></th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each comments}}
+                    <tr>
+                        <td>{{index @index}}</td>
+                        <td>{{this.name}}</td>
+                        <td>{{this.email}}</td>
+                        <td><a target="_blank" href="/post/{{this.post_id.slug}}">{{this.post_id.title}}</a></td>
+                        <td><a target="_blank" href="/post/{{this.post_id.slug}}#{{this._id}}"><span class="fa fa-eye"></span>&nbsp;لینک نظر</a></td>
+                        <td>
+                            <a href="/dashboard/comments/{{this._id}}/edit" class="text-warning"><span class="fa fa-edit"></span></a>
+                            &nbsp;
+                            <a href="/dashboard/comments/{{this._id}}/delete" class="text-danger" onclick="return confirm('آیا حذف شود؟')"><span class="fa fa-trash-o"></span></a>
+                        </td>
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+</div>

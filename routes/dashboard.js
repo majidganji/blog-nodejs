@@ -4,6 +4,7 @@ var multer = require('multer');
 var Post = require('../models/post');
 var path = require('path');
 var fs = require('fs');
+var Comments = require('../models/comment');
 
 var router = express.Router();
 
@@ -206,6 +207,58 @@ router.get('/search-post', function(req, res, next){
     }else{
         return res.render('dashboard/search', {title: 'جستجو مطلب'})
     }
+});
+
+router.get('/comments/:id/delete', function (req, res, next) {
+    Comments.findByIdAndRemove(req.params.id, function (err, offer) {
+        if (!err && offer){
+            req.flash('success', 'با موفقیت حذف شد.');
+        }else{
+            req.flash('danger', 'خطا لطفا دوباره تلاش کنید.');
+        }
+        return res.redirect(req.header('Referer') || '/dashboard/comments');
+    });
+});
+
+router.get('/comments/:id/edit', function (req, res, next) {
+    Comments.findOne({_id: req.params.id}).populate('post_id').exec(function (err, offer) {
+        if (err){return;}
+        return res.render('dashboard/comments/edit', {
+            title: 'ویرایش نظر',
+            comment: offer
+        });
+    });
+});
+
+router.post('/comments/:id/edit', function (req, res, next){
+    Comments.findOne({_id: req.params.id}, function (err, offer) {
+        if (err){return;}
+        offer.name = req.body.name;
+        offer.email = req.body.email;
+        offer.body = req.body.comment;
+        offer.save(function (err, result) {
+            if (!err && result){
+                req.flash('success', 'با موفقیت ویرایش شد.');
+            }else{
+                req.flash('danger', 'خطا، لطفا دوباره تلاش کنید.');
+            }
+            res.redirect('/dashboard/comments');
+        });
+    });
+});
+
+router.get('/comments', function(req, res, next){
+    Comments.find().populate('post_id').sort({'_id': 'descending'}).exec(function (err, comments) {
+        return res.render('dashboard/comments/comments',{
+            title: 'مدیریت نظرات',
+            comments: comments,
+            helpers: {
+                index: function (index) {
+                    return ++index;
+                }
+            }
+        });
+    });
 });
 
 module.exports = router;
