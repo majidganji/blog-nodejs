@@ -174,6 +174,40 @@ router.post('/post-edit/:postId', upload.single('image'), function (req, res, ne
     });
 });
 
+router.get('/search-post', function(req, res, next){
+    //TODO: CSRF TOKEN
+    if (req.query.title || req.query.slug || req.query.status || req.query.editor){
+        var query = {};
+        if (req.query.title){
+            query['title'] =  {$regex: req.query.title};
+        }
+        if (req.query.slug){
+            // query['slug'] = /req.query.slug/;
+            query['slug'] = { $regex: req.query.slug}
+        }
+        if (req.query.editor){
+            query['editor'] = req.query.editor;
+        }
+        if (req.query.status){
+            query['status'] = req.query.status === 'on';
+        }
+        Post.find(query).populate('user_id').exec(function (err, posts) {
+            res.render('dashboard/search', {
+                title: 'جستجو مطلب',
+                posts: posts,
+                helpers: {
+                    index: function (index) {
+                        return ++index;
+                    }
+                },
+                search: req.query
+            })
+        });
+    }else{
+        return res.render('dashboard/search', {title: 'جستجو مطلب'})
+    }
+});
+
 module.exports = router;
 
 function fileFilter (req, file, cb) {

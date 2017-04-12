@@ -1,0 +1,124 @@
+<div class="row">
+    <div class="col-sm-12">
+        <h3>جستجو</h3>
+        <hr>
+    </div>
+    <div class="col-sm-12">
+        <form action="/dashboard/search-post" method="get">
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="title">عنوان</label>
+                        <input type="text" id="title" name="title" class="form-control" value="{{search.title}}">
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="editor">نویسنده</label>
+                        <!--<input type="text" id="editor" name="editor" class="form-control" value="{{search.editor}}">-->
+                        <select id="editor" name="editor" title="نویسنده" class="form-control">
+                            <option value=""></option>
+
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label for="slug">مسیر</label>
+                        <input type="text" class="form-control" id="slug" name="slug" value="{{search.slug}}">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-5">
+                    <div class="form-group">
+                        <label for="status">وضعیت</label>
+                        <input type="checkbox" class="checkbox-inline" id="status" name="status" {{#if search.status}}checked{{/if}}>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <button class="btn btn-success" type="submit">جستجو</button>
+                        <a class="btn btn-default" href="/dashboard/search-post">لغو</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{#if posts}}
+    <div class="row">
+        <div class="col-sm-12">
+            <h3>نتیجه جستجو</h3>
+            <hr>
+        </div>
+        <div class="col-sm-12">
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>عنوان</th>
+                    <th>نویسنده</th>
+                    <th>وضعیت</th>
+                    <th class="col-sm-1"><span class="fa fa-gear"></span></th>
+                </tr>
+                </thead>
+                <tbody>
+                {{#each posts}}
+                    <tr class="row-post">
+                        <td class="index-row-posts">
+                            {{index @index}}
+                        </td>
+                        <td>{{this.title}}</td>
+                        <td>
+                            {{this.user_id.name}}
+                        </td>
+                        <td>{{this.status}}</td>
+                        <td>
+                            <a href="/dashboard/post-delete/{{this.id}}" class="delete-post text-danger"><span class="fa fa-trash"></span></a>
+                            <a href="/dashboard/post-edit/{{this.id}}" class="text-warning"><span class="fa fa-edit"></span></a>
+                            <a href="/post/{{this.slug}}" class="text-info"><span class="fa fa-eye"></span></a>
+                        </td>
+                    </tr>
+                {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        $('.delete-post').on('click', function (event) {
+            event.preventDefault();
+            var confirm = window.confirm('آیا حذف شود؟');
+            if (!confirm){
+                return false;
+            }
+            var $this = $(this);
+            var url = $this.attr('href');
+            $.ajax({
+                url: url,
+                type: 'get',
+                cache: false,
+                success: function (result) {
+                    if(result){
+                        var row = $this.parent().parent();
+                        var nextAll = row.nextAll();
+                        var count = row.siblings().size();
+                        if (count < 1){
+                            location.reload();
+                        }
+                        row.remove();
+                        nextAll.each(function (index) {
+                            var td = $(this).children('.index-row-posts');
+                            td.text(td.text() - 1);
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+{{/if}}
