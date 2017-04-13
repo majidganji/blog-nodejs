@@ -249,6 +249,36 @@ router.post('/comments/:id/edit', function (req, res, next){
     });
 });
 
+router.get('/comments/search', function (req, res, next) {
+    if(req.query.name || req.query.email || req.query.post){
+        var query = {};
+        if (req.query.name){
+            query['name'] = {$regex: req.query.name};
+        }
+        if (req.query.email){
+            query['email'] = {$regex: req.query.email};
+        }
+        if (req.query.post){
+            query['post_id.title'] = {$regex: req.query.post}
+        }
+        Comments.find(query).populate('post_id').exec(function (err, comments) {
+            res.render('dashboard/comments/search', {
+                title: 'جستجو',
+                comments: comments,
+                helpers: {
+                    index: function (index) {
+                        return ++index;
+                    }
+                }
+            });
+        });
+    }else{
+        return res.render('dashboard/comments/search', {
+            title: 'جستجو'
+        });
+    }
+});
+
 router.get('/comments', function(req, res, next){
     Comments.find().populate('post_id').sort({'_id': 'descending'}).exec(function (err, comments) {
         return res.render('dashboard/comments/comments',{

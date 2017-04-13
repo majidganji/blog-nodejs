@@ -1,17 +1,38 @@
 <div class="row">
     <div class="col-sm-12">
-        <h3>مدیریت نظرات</h3>
+        <h3>جستجو نظرات</h3>
         <hr>
-        <p>
-            <a href="/dashboard/comments/search" class="btn btn-default">جستجو</a>
-        </p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <form action="/dashboard/comments/search" method="get">
+            <div class="form-group">
+                <label for="name"> نام</label>
+                <input type="text" id="name" name="name" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="email">پست الکترونیکی</label>
+                <input type="text" id="email" name="email" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="post">مطلب</label>
+                <input type="text" id="post" name="post" class="form-control">
+            </div>
+            <div class="form-group">
+                <button class="btn btn-success" type="submit">جستجو</button>
+                <button class="btn btn-default" type="reset">لغو</button>
+            </div>
+        </form>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-sm-12">
-        <table class="table-responsive table table-bordered">
-            <thead>
+{{#if comments}}
+
+    <div class="row">
+        <div class="col-sm-12">
+            <table class="table-responsive table table-bordered">
+                <thead>
                 <tr>
                     <th>&nbsp;</th>
                     <th>نام</th>
@@ -20,8 +41,8 @@
                     <th>مشاهده</th>
                     <th class="col-sm-1"><span class="fa fa-gear"></span></th>
                 </tr>
-            </thead>
-            <tbody>
+                </thead>
+                <tbody>
                 {{#each comments}}
                     <tr>
                         <td>{{index @index}}</td>
@@ -36,7 +57,8 @@
                         </td>
                     </tr>
                 {{/each}}
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
+{{/if}}
