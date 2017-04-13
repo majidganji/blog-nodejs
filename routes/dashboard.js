@@ -41,7 +41,7 @@ router.get('/index', function (req, res, next) {
 
 router.get('/new-post', function (req, res, next) {
     var message = req.flash('error');
-    res.render('dashboard/new-post', {csrfToken: 'sad', message: message, hasError: message.length > 0});
+    res.render('dashboard/posts/new-post', {csrfToken: 'sad', message: message, hasError: message.length > 0});
 });
 
 router.post('/new-post', upload.single('image'), function (req, res, next) {
@@ -80,7 +80,8 @@ router.post('/new-post', upload.single('image'), function (req, res, next) {
             if(imagePath){
                 fs.unlinkSync(imagePath);
             }
-            res.render('dashboard/new-post', {csrfToken: 'sad', message: messages, hasError: messages.length > 0, post: post});
+            //TODO: csrf token
+            res.render('dashboard/posts/new-post', {csrfToken: 'sad', message: messages, hasError: messages.length > 0, post: post});
         }else{
             post.save(function (err, post) {
                 if (err){
@@ -100,7 +101,7 @@ router.post('/new-post', upload.single('image'), function (req, res, next) {
 
 router.get('/posts', function (req, res, next) {
     Post.find().populate('user_id').sort({'_id': 'descending'}).exec(function (err, posts) {
-        res.render('dashboard/posts', {
+        res.render('dashboard/posts/posts', {
             posts: posts,
             title: 'مطالب',
             helpers: {
@@ -129,12 +130,13 @@ router.get('/post-edit/:postId', function (req, res, next) {
             req.flash('danger', 'خطا لطفا دوباره تلاش کنید.');
             res.redirect('/dashboard/posts');
        }
-        res.render('dashboard/edit', {post: data, title: 'ویرایش' + data.title, csrfToken: 'sad'});
+        res.render('dashboard/posts/edit', {post: data, title: 'ویرایش' + data.title, csrfToken: 'sad'});
     });
 });
 
 router.post('/post-edit/:postId', upload.single('image'), function (req, res, next) {
     Post.findById(req.params.postId, function (err, data) {
+        //TODO: Handel Error
         if (err){
 
         }
@@ -151,7 +153,7 @@ router.post('/post-edit/:postId', upload.single('image'), function (req, res, ne
         console.log(messages);
         if (messages.length > 0){
             //TODO: csrf Token
-            return res.render('dashboard/edit', {post: data, title: 'ویرایش' + data.title, csrfToken: 'sad', hasError: messages.length > 0, message: messages})
+            return res.render('dashboard/posts/edit', {post: data, title: 'ویرایش' + data.title, csrfToken: 'sad', hasError: messages.length > 0, message: messages})
         }else{
             if (req.file){
                 data.image = req.file.filename;
@@ -162,7 +164,7 @@ router.post('/post-edit/:postId', upload.single('image'), function (req, res, ne
                         fs.unlinkSync(req.file.path);
                     }
                     messages.push('مسیر نمی تواند تکراری باشد.');
-                    return res.render('dashboard/edit', {post: data, title: 'ویرایش' + data.title, csrfToken: 'sad', hasError: messages.length > 0, message: messages})
+                    return res.render('dashboard/posts/edit', {post: data, title: 'ویرایش' + data.title, csrfToken: 'sad', hasError: messages.length > 0, message: messages})
                 }else{
                     if(req.file){
                         fs.unlinkSync(oldImage);
@@ -193,7 +195,7 @@ router.get('/search-post', function(req, res, next){
             query['status'] = req.query.status === 'on';
         }
         Post.find(query).populate('user_id').exec(function (err, posts) {
-            res.render('dashboard/search', {
+            res.render('dashboard/posts/search', {
                 title: 'جستجو مطلب',
                 posts: posts,
                 helpers: {
@@ -205,7 +207,7 @@ router.get('/search-post', function(req, res, next){
             })
         });
     }else{
-        return res.render('dashboard/search', {title: 'جستجو مطلب'})
+        return res.render('dashboard/posts/search', {title: 'جستجو مطلب'})
     }
 });
 

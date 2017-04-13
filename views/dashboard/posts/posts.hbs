@@ -1,5 +1,7 @@
 <div class="row">
     <div class="col-sm-12">
+        <h3>مدیریت مطالب</h3>
+        <hr>
         <p>
             <a href="/dashboard/new-post" class="btn btn-default">مطلب جدید</a>
             <a href="/dashboard/search-post" class="btn btn-default">جستجو</a>
@@ -34,7 +36,7 @@
                         <td>
                             <a href="/dashboard/post-delete/{{this.id}}" class="delete-post text-danger"><span class="fa fa-trash"></span></a>
                             <a href="/dashboard/post-edit/{{this.id}}" class="text-warning"><span class="fa fa-edit"></span></a>
-                            <a href="/post/{{this.slug}}" class="text-info"><span class="fa fa-eye"></span></a>
+                            <a target="_blank" href="/post/{{this.slug}}" class="text-info"><span class="fa fa-eye"></span></a>
                         </td>
                     </tr>
                 {{/each}}
