@@ -21,7 +21,8 @@
             </div>
             <div class="form-group">
                 <label for="slug">مسیر</label>
-                <input type="text" id="slug" name="slug" class="form-control" value="{{post.slug}}">
+                <p class="text-description paddingright15px text-muted"><span class="fa fa-info"></span>&nbsp; مسیر نام انگلیسی و یکتا  برای پیدا کردن مطلب مورد نظر است. که در Url بالای صفحه درج می‌شود.</p>
+                <input type="text" id="slug" name="slug" class="form-control text-direction-ltr" value="{{post.slug}}">
             </div>
             <div class="form-group">
                 <label for="body">متن</label>
@@ -34,7 +35,15 @@
                 <input type="file" id="image" name="image" value="{{post.image}}"/>
             </div>
             <div class="form-group">
-                <button type="submit" class="btn btn-success">انتشار</button>
+                <label for="publish">وضعیت:</label>
+                <select name="publish" id="publish">
+                    <option value="10">منتشر شده</option>
+                    <option value="1">پیش نویس</option>
+                    <option value="0">عدم نمایش</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-success">ذخیره</button>
                 <a href="/dashboard/posts" class="btn btn-default">لغو</a>
             </div>
         </div>

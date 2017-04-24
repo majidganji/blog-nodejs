@@ -27,15 +27,21 @@
                 <div class="col-sm-12">
                     <div class="form-group">
                         <label for="slug">مسیر</label>
-                        <input type="text" class="form-control" id="slug" name="slug" value="{{search.slug}}">
+                        <p class="text-description paddingright15px text-muted"><span class="fa fa-info"></span>&nbsp; مسیر نام انگلیسی و یکتا  برای پیدا کردن مطلب مورد نظر است. که در Url بالای صفحه درج می‌شود.</p>
+                        <input type="text" class="form-control text-direction-ltr" id="slug" name="slug" value="{{search.slug}}">
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-sm-5">
                     <div class="form-group">
-                        <label for="status">وضعیت</label>
-                        <input type="checkbox" class="checkbox-inline" id="status" name="status" {{#if search.status}}checked{{/if}}>
+                        <label for="publish">وضعیت</label>
+                        <select name="publish" id="publish">
+                            <option value=""></option>
+                            <option {{#if search.publish}} {{selected search.publish 10}} {{/if}} value="10">منتشر شده</option>
+                            <option {{#if search.publish}} {{selected search.publish 1}} {{/if}} value="1">پیش نویس</option>
+                            <option {{#if search.publish}} {{selected search.publish 0}} {{/if}} value="0">عدم نمایش</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -64,7 +70,7 @@
                     <th>#</th>
                     <th>عنوان</th>
                     <th>نویسنده</th>
-                    <th>وضعیت</th>
+                    <th class="col-sm-2">وضعیت</th>
                     <th class="col-sm-1"><span class="fa fa-gear"></span></th>
                 </tr>
                 </thead>
@@ -78,7 +84,7 @@
                         <td>
                             {{this.user_id.name}}
                         </td>
-                        <td>{{this.status}}</td>
+                        <td>{{status this.publish}}</td>
                         <td>
                             <a href="/dashboard/post-delete/{{this.id}}" class="delete-post text-danger"><span class="fa fa-trash"></span></a>
                             <a href="/dashboard/post-edit/{{this.id}}" class="text-warning"><span class="fa fa-edit"></span></a>

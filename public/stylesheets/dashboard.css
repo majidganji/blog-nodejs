@@ -1,0 +1,11 @@
+.text-description{
+    font-size:smaller;
+}
+
+.text-direction-ltr{
+    direction: ltr;
+}
+
+.paddingright15px{
+    padding-right: 15px;
+}

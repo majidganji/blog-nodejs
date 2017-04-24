@@ -12,7 +12,7 @@ router.use(function (req, res, next) {
 });
 
 router.get('/', function(req, res, next) {
-    Post.find().sort({'_id': 'descending'}).exec(function (err, posts) {
+    Post.find().sort({'_id': 'descending'}).where({publish: 10}).exec(function (err, posts) {
         if (err){
 
         }

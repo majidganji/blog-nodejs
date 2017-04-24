@@ -21,8 +21,6 @@ var upload = multer({
     limits: {fileSize: 2e+6, files:1},
     fileFilter: fileFilter,
     rename: function (fieldname, filename) {
-        console.log(fieldname);
-        console.log(filename);
         return  fieldname + filename + Date.now();
     }
 });
@@ -41,7 +39,7 @@ router.get('/index', function (req, res, next) {
 
 router.get('/new-post', function (req, res, next) {
     var message = req.flash('error');
-    res.render('dashboard/posts/new-post', {csrfToken: 'sad', message: message, hasError: message.length > 0});
+    res.render('dashboard/posts/new-post', {csrfToken: 'sad', message: message, hasError: message.length > 0, title: 'درج مطلب جدید'});
 });
 
 router.post('/new-post', upload.single('image'), function (req, res, next) {
@@ -51,7 +49,6 @@ router.post('/new-post', upload.single('image'), function (req, res, next) {
     post.title = req.body.title;
     post.slug = req.body.slug;
     post.body = req.body.body;
-    post.status = true;
     post.created_at = Date.now();
     post.updated_at = Date.now();
     var error = post.validateSync();
@@ -72,6 +69,12 @@ router.post('/new-post', upload.single('image'), function (req, res, next) {
         post.image = req.file.filename;
         imagePath = req.file.path;
     }
+    var array = ['0', '1', '10'];
+    if (array.includes(req.body.publish) === false){
+        messages.push('وضعیت غیر معتبر است.');
+    }else{
+        post.publish = req.body.publish;
+    }
     Post.findOne({slug: req.body.slug}, function (err, postslug) {
         if (postslug){
             messages.push('مسیر نمی تواند تکراری باشد، لطفا مسیر دیگری انتخاب کنید.');
@@ -81,7 +84,7 @@ router.post('/new-post', upload.single('image'), function (req, res, next) {
                 fs.unlinkSync(imagePath);
             }
             //TODO: csrf token
-            res.render('dashboard/posts/new-post', {csrfToken: 'sad', message: messages, hasError: messages.length > 0, post: post});
+            res.render('dashboard/posts/new-post', {csrfToken: 'sad', message: messages, hasError: messages.length > 0, post: post, title: 'درج مطلب جدید'});
         }else{
             post.save(function (err, post) {
                 if (err){
@@ -107,6 +110,17 @@ router.get('/posts', function (req, res, next) {
             helpers: {
                 index: function (index) {
                     return ++index;
+                },
+                status: function (publish) {
+                    if (publish === 10){
+                        return 'منتشر شده';
+                    }else if(publish === 1){
+                        return 'پیش نویس';
+                    }else if(publish === 0){
+                        return 'عدم نمایش';
+                    }else{
+                        return 'غیر معتبر';
+                    }
                 }
             }
         });
@@ -130,7 +144,22 @@ router.get('/post-edit/:postId', function (req, res, next) {
             req.flash('danger', 'خطا لطفا دوباره تلاش کنید.');
             res.redirect('/dashboard/posts');
        }
-        res.render('dashboard/posts/edit', {post: data, title: 'ویرایش' + data.title, csrfToken: 'sad'});
+        res.render('dashboard/posts/edit', {
+            post: data,
+            title: ' ویرایش ' + data.title,
+            csrfToken: 'sad',
+            helpers:{
+                selected: function (publish, item) {
+                    if (publish === item){
+                        return 'selected';
+                    }else if( publish === item){
+                        return 'selected';
+                    }else if(publish === item){
+                        return 'selected';
+                    }
+                }
+            }
+        });
     });
 });
 
@@ -150,10 +179,26 @@ router.post('/post-edit/:postId', upload.single('image'), function (req, res, ne
         data.slug = req.body.slug;
         data.body = req.body.body;
         data.updated_at = Date.now();
-        console.log(messages);
         if (messages.length > 0){
             //TODO: csrf Token
-            return res.render('dashboard/posts/edit', {post: data, title: 'ویرایش' + data.title, csrfToken: 'sad', hasError: messages.length > 0, message: messages})
+            return res.render('dashboard/posts/edit', {
+                post: data,
+                title: ' ویرایش ' + data.title,
+                csrfToken: 'sad',
+                hasError: messages.length > 0,
+                message: messages,
+                helpers:{
+                    selected: function (publish, item) {
+                        if (publish === item){
+                            return 'selected';
+                        }else if( publish === item){
+                            return 'selected';
+                        }else if(publish === item){
+                            return 'selected';
+                        }
+                    }
+                }
+            })
         }else{
             if (req.file){
                 data.image = req.file.filename;
@@ -164,7 +209,23 @@ router.post('/post-edit/:postId', upload.single('image'), function (req, res, ne
                         fs.unlinkSync(req.file.path);
                     }
                     messages.push('مسیر نمی تواند تکراری باشد.');
-                    return res.render('dashboard/posts/edit', {post: data, title: 'ویرایش' + data.title, csrfToken: 'sad', hasError: messages.length > 0, message: messages})
+                    return res.render('dashboard/posts/edit', {
+                        post: data,
+                        title: ' ویرایش ' + data.title,
+                        csrfToken: 'sad', hasError: messages.length > 0,
+                        message: messages,
+                        helpers:{
+                            selected: function (publish, item) {
+                                if (publish === item){
+                                    return 'selected';
+                                }else if( publish === item){
+                                    return 'selected';
+                                }else if(publish === item){
+                                    return 'selected';
+                                }
+                            }
+                        }
+                    })
                 }else{
                     if(req.file){
                         fs.unlinkSync(oldImage);
@@ -179,7 +240,7 @@ router.post('/post-edit/:postId', upload.single('image'), function (req, res, ne
 
 router.get('/search-post', function(req, res, next){
     //TODO: CSRF TOKEN
-    if (req.query.title || req.query.slug || req.query.status || req.query.editor){
+    if (req.query.title || req.query.slug || req.query.publish || req.query.editor){
         var query = {};
         if (req.query.title){
             query['title'] =  {$regex: req.query.title};
@@ -191,8 +252,8 @@ router.get('/search-post', function(req, res, next){
         if (req.query.editor){
             query['editor'] = req.query.editor;
         }
-        if (req.query.status){
-            query['status'] = req.query.status === 'on';
+        if (req.query.publish){
+            query['publish'] = req.query.publish;
         }
         Post.find(query).populate('user_id').exec(function (err, posts) {
             res.render('dashboard/posts/search', {
@@ -201,6 +262,26 @@ router.get('/search-post', function(req, res, next){
                 helpers: {
                     index: function (index) {
                         return ++index;
+                    },
+                    status: function (publish) {
+                        if (publish === 10){
+                            return 'منتشر شده';
+                        }else if(publish === 1){
+                            return 'پیش نویس';
+                        }else if(publish === 0){
+                            return 'عدم نمایش';
+                        }else{
+                            return 'غیر معتبر';
+                        }
+                    },
+                    selected: function (publish, item) {
+                        if (publish === String(item)){
+                            return 'selected';
+                        }else if( publish === String(item)){
+                            return 'selected';
+                        }else if(publish === String(item)){
+                            return 'selected';
+                        }
                     }
                 },
                 search: req.query
@@ -314,6 +395,12 @@ function validateEditPost(req, res, post){
         errors.forEach(function (item) {
             messages.push(item.msg);
         });
+    }
+    var array = ['0', '1', '10'];
+    if (array.includes(req.body.publish) === false){
+        messages.push('وضعیت غیر معتبر است.');
+    }else{
+        post.publish = req.body.publish;
     }
     return messages;
 }

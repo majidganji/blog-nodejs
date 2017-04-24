@@ -18,7 +18,7 @@
                     <th>#</th>
                     <th>عنوان</th>
                     <th>نویسنده</th>
-                    <th>وضعیت</th>
+                    <th class="col-sm-2">وضعیت</th>
                     <th class="col-sm-1"><span class="fa fa-gear"></span></th>
                 </tr>
             </thead>
@@ -32,7 +32,7 @@
                         <td>
                             {{this.user_id.name}}
                         </td>
-                        <td>{{this.status}}</td>
+                        <td>{{status this.publish}}</td>
                         <td>
                             <a href="/dashboard/post-delete/{{this.id}}" class="delete-post text-danger"><span class="fa fa-trash"></span></a>
                             <a href="/dashboard/post-edit/{{this.id}}" class="text-warning"><span class="fa fa-edit"></span></a>
