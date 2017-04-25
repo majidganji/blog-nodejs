@@ -2,7 +2,7 @@
     <div class="row">
         <div class="col-sm-12">
             <div class="alert alert-danger">
-                <ul >
+                <ul>
                     {{#each message}}
                         <li><p>{{this}}</p></li>
                     {{/each}}
@@ -11,51 +11,60 @@
         </div>
     </div>
 {{/if}}
-<form action="/dashboard/post-edit/{{post._id}}" method="post" enctype="multipart/form-data">
-    <input type="hidden" name="_csrf" value="{{csrfToken}}">
-    <div class="row">
-        <div class="col-sm-12">
+<div class="row">
+    <div class="col-sm-12">
+        <form action="/dashboard/post-edit/{{post._id}}" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="_csrf" value="{{csrfToken}}">
             <div class="form-group">
                 <label for="title">عنوان</label>
                 <input type="text" id="title" name="title" class="form-control" value="{{post.title}}">
             </div>
             <div class="form-group">
                 <label for="slug">مسیر</label>
-                <p class="text-description paddingright15px text-muted"><span class="fa fa-info"></span>&nbsp; مسیر نام انگلیسی و یکتا  برای پیدا کردن مطلب مورد نظر است. که در Url بالای صفحه درج می‌شود.</p>
+                <p class="text-description paddingright15px text-muted"><span class="fa fa-info"></span>&nbsp; مسیر نام
+                    انگلیسی و یکتا برای پیدا کردن مطلب مورد نظر است. که در Url بالای صفحه درج می‌شود.</p>
                 <input type="text" id="slug" name="slug" class="form-control" value="{{post.slug}}">
             </div>
             <div class="form-group">
                 <label for="body">متن</label>
                 <textarea name="body" id="body" cols="50" rows="10">{{post.body}}</textarea>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-sm-4">
-                <div class="form-group">
-                    <label for="image">تصویر</label>
-                    <input type="file" id="image" name="image" value="{{post.image}}"/>
+            <div class="form-group">
+                <label for="category">دسته‌بندی</label>
+                <select name="category" id="category" class="form-control form-control-select">
+                    {{#each category}}
+                        <option {{selected ../post.category_id this._id}} value="{{this._id}}">{{this.name}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="image">تصویر</label>
+                        <input type="file" id="image" name="image" value="{{post.image}}"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="publish">وضعیت:</label>
+                        <select name="publish" id="publish">
+                            <option {{selected post.publish 10}} value="10">منتشر شده</option>
+                            <option {{selected post.publish 1}} value="1">پیش نویس</option>
+                            <option {{selected post.publish 0}} value="0">عدم نمایش</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-success">ذخیره</button>
+                        <a href="/dashboard/index" class="btn btn-default">لغو</a>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="publish">وضعیت:</label>
-                    <select name="publish" id="publish">
-                        <option {{selected post.publish 10}} value="10">منتشر شده</option>
-                        <option {{selected post.publish 1}} value="1">پیش نویس</option>
-                        <option {{selected post.publish 0}} value="0">عدم نمایش</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <button type="submit" class="btn btn-success">ذخیره</button>
-                    <a href="/dashboard/index" class="btn btn-default">لغو</a>
+                <div class="col-sm-4">
+                    <img class="img-thumbnail" src="/images/uploads/{{post.image}}" alt="{{post.title}}">
                 </div>
             </div>
-            <div class="col-sm-4">
-                <img class="img-thumbnail" src="/images/uploads/{{post.image}}" alt="{{post.title}}">
-            </div>
-        </div>
+        </form>
     </div>
-</form>
+</div>
 
 <script src="/ckeditor/ckeditor.js"></script>
 <script>
-    CKEDITOR.replace( 'body' );
+    CKEDITOR.replace('body');
 </script>

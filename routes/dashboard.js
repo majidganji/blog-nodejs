@@ -10,7 +10,7 @@ var Categories = require('../models/categories');
 var router = express.Router();
 
 router.use(function (req, res, next) {
-    if(req.isAuthenticated()){
+    if (req.isAuthenticated()) {
         return next();
     }
     req.flash('backUrl', '/dashboard' + req.url);
@@ -19,14 +19,14 @@ router.use(function (req, res, next) {
 
 var upload = multer({
     dest: 'public/images/uploads',
-    limits: {fileSize: 2e+6, files:1},
+    limits: {fileSize: 2e+6, files: 1},
     fileFilter: fileFilter,
     rename: function (fieldname, filename) {
-        return  fieldname + filename + Date.now();
+        return fieldname + filename + Date.now();
     }
 });
 //TODO: csrf error ..........................
-var csrfProtection = csrf({ cookie: true });
+var csrfProtection = csrf({cookie: true});
 // router.use(csrfProtection);
 
 router.use(function (req, res, next) {
@@ -40,7 +40,16 @@ router.get('/index', function (req, res, next) {
 
 router.get('/new-post', function (req, res, next) {
     var message = req.flash('error');
-    res.render('dashboard/posts/new-post', {csrfToken: 'sad', message: message, hasError: message.length > 0, title: 'درج مطلب جدید'});
+    Categories.find(function (err, offer) {
+        res.render('dashboard/posts/new-post', {
+            csrfToken: 'sad',
+            message: message,
+            hasError: message.length > 0,
+            title: 'درج مطلب جدید',
+           category: offer
+        });
+    });
+
 });
 
 router.post('/new-post', upload.single('image'), function (req, res, next) {
@@ -50,50 +59,61 @@ router.post('/new-post', upload.single('image'), function (req, res, next) {
     post.title = req.body.title;
     post.slug = req.body.slug;
     post.body = req.body.body;
+    post.category_id = req.body.category;
     post.created_at = Date.now();
     post.updated_at = Date.now();
     var error = post.validateSync();
     error = error.errors;
-    if(error.title){
+    if (error.title) {
         messages.push(error.title.message);
     }
-    if(error.slug){
+    if (error.slug) {
         messages.push(error.slug.message);
     }
-    if(error.body){
+    if (error.body) {
         messages.push(error.body.message);
     }
     var imagePath = null;
-    if (!req.file){
+    if (!req.file) {
         messages.push('تصویر نمی تواند خالی باشد.');
-    }else {
+    } else {
         post.image = req.file.filename;
         imagePath = req.file.path;
     }
     var array = ['0', '1', '10'];
-    if (array.includes(req.body.publish) === false){
+    if (array.includes(req.body.publish) === false) {
         messages.push('وضعیت غیر معتبر است.');
-    }else{
+    } else {
         post.publish = req.body.publish;
     }
     Post.findOne({slug: req.body.slug}, function (err, postslug) {
-        if (postslug){
+        if (postslug) {
             messages.push('مسیر نمی تواند تکراری باشد، لطفا مسیر دیگری انتخاب کنید.');
         }
-        if (messages.length > 0){
-            if(imagePath){
+        if (messages.length > 0) {
+            if (imagePath) {
                 fs.unlinkSync(imagePath);
             }
             //TODO: csrf token
-            res.render('dashboard/posts/new-post', {csrfToken: 'sad', message: messages, hasError: messages.length > 0, post: post, title: 'درج مطلب جدید'});
-        }else{
+            Categories.find(function (err, category) {
+                res.render('dashboard/posts/new-post', {
+                    csrfToken: 'sad',
+                    message: messages,
+                    hasError: messages.length > 0,
+                    post: post,
+                    title: 'درج مطلب جدید',
+                    category: category
+                });
+            });
+        } else {
             post.save(function (err, post) {
-                if (err){
-                    if(imagePath){
+                console.log(String(err));
+                if (err) {
+                    if (imagePath) {
                         fs.unlinkSync(imagePath);
                     }
                     req.flash('danger', 'بروز خطا در ذخیره مطلب جدید، دوباره تلاش کنید.');
-                }else{
+                } else {
                     req.flash('success', 'با موفقیت ذخیره شد');
                 }
                 res.redirect('/dashboard/posts');
@@ -113,13 +133,13 @@ router.get('/posts', function (req, res, next) {
                     return ++index;
                 },
                 status: function (publish) {
-                    if (publish === 10){
+                    if (publish === '10') {
                         return 'منتشر شده';
-                    }else if(publish === 1){
+                    } else if (publish === '1') {
                         return 'پیش نویس';
-                    }else if(publish === 0){
+                    } else if (publish === '0') {
                         return 'عدم نمایش';
-                    }else{
+                    } else {
                         return 'غیر معتبر';
                     }
                 }
@@ -130,9 +150,9 @@ router.get('/posts', function (req, res, next) {
 
 router.get('/post-delete/:postId', function (req, res, next) {
     Post.findByIdAndRemove(req.params.postId, function (err, offer) {
-        if (err){
+        if (err) {
             res.send(false);
-        }else{
+        } else {
             fs.unlinkSync('public/images/uploads/' + offer.image);
             res.send(true);
         }
@@ -141,25 +161,26 @@ router.get('/post-delete/:postId', function (req, res, next) {
 
 router.get('/post-edit/:postId', function (req, res, next) {
     Post.findById(req.params.postId, function (err, data) {
-       if (err){
+        if (err) {
             req.flash('danger', 'خطا لطفا دوباره تلاش کنید.');
             res.redirect('/dashboard/posts');
-       }
-        res.render('dashboard/posts/edit', {
-            post: data,
-            title: ' ویرایش ' + data.title,
-            csrfToken: 'sad',
-            helpers:{
-                selected: function (publish, item) {
-                    if (publish === item){
-                        return 'selected';
-                    }else if( publish === item){
-                        return 'selected';
-                    }else if(publish === item){
-                        return 'selected';
+        }
+        Categories.find(function (err, category) {
+            res.render('dashboard/posts/edit', {
+                post: data,
+                title: ' ویرایش ' + data.title,
+                csrfToken: 'sad',
+                category: category,
+                helpers: {
+                    selected: function (publish, item) {
+                        console.log('------------>  ' + publish + ' -  ' + item);
+                        if (String(publish) === String(item)) {
+                            return 'selected';
+                        }
+                        return '';
                     }
                 }
-            }
+            });
         });
     });
 });
@@ -167,10 +188,10 @@ router.get('/post-edit/:postId', function (req, res, next) {
 router.post('/post-edit/:postId', upload.single('image'), function (req, res, next) {
     Post.findById(req.params.postId, function (err, data) {
         //TODO: Handel Error
-        if (err){
+        if (err) {
 
         }
-        if (!data){
+        if (!data) {
 
         }
         var messages = validateEditPost(req, res, data);
@@ -179,56 +200,58 @@ router.post('/post-edit/:postId', upload.single('image'), function (req, res, ne
         data.title = req.body.title;
         data.slug = req.body.slug;
         data.body = req.body.body;
+        data.category_id = req.body.category;
         data.updated_at = Date.now();
-        if (messages.length > 0){
+        if (messages.length > 0) {
             //TODO: csrf Token
-            return res.render('dashboard/posts/edit', {
-                post: data,
-                title: ' ویرایش ' + data.title,
-                csrfToken: 'sad',
-                hasError: messages.length > 0,
-                message: messages,
-                helpers:{
-                    selected: function (publish, item) {
-                        if (publish === item){
-                            return 'selected';
-                        }else if( publish === item){
-                            return 'selected';
-                        }else if(publish === item){
-                            return 'selected';
+            Categories.find(function (err, category) {
+                return res.render('dashboard/posts/edit', {
+                    post: data,
+                    title: ' ویرایش ' + data.title,
+                    csrfToken: 'sad',
+                    hasError: messages.length > 0,
+                    message: messages,
+                    category: category,
+                    helpers: {
+                        selected: function (publish, item) {
+                            console.log('------------>  ' + publish + ' -  ' + item);
+                            if (String(publish) === String(item)) {
+                                return 'selected';
+                            }
+                            return '';
                         }
                     }
-                }
-            })
-        }else{
-            if (req.file){
+                });
+            });
+        } else {
+            if (req.file) {
                 data.image = req.file.filename;
             }
             data.save(function (err, post) {
-                if (err){
-                    if (req.file){
+                if (err) {
+                    if (req.file) {
                         fs.unlinkSync(req.file.path);
                     }
                     messages.push('مسیر نمی تواند تکراری باشد.');
-                    return res.render('dashboard/posts/edit', {
-                        post: data,
-                        title: ' ویرایش ' + data.title,
-                        csrfToken: 'sad', hasError: messages.length > 0,
-                        message: messages,
-                        helpers:{
-                            selected: function (publish, item) {
-                                if (publish === item){
-                                    return 'selected';
-                                }else if( publish === item){
-                                    return 'selected';
-                                }else if(publish === item){
-                                    return 'selected';
+                    Categories.find(function (err, category) {
+                        return res.render('dashboard/posts/edit', {
+                            post: data,
+                            title: ' ویرایش ' + data.title,
+                            csrfToken: 'sad', hasError: messages.length > 0,
+                            message: messages,
+                            category: category,
+                            helpers: {
+                                selected: function (publish, item) {
+                                    if (String(publish) === String(item)) {
+                                        return 'selected';
+                                    }
+                                    return '';
                                 }
                             }
-                        }
-                    })
-                }else{
-                    if(req.file){
+                        });
+                    });
+                } else {
+                    if (req.file) {
                         fs.unlinkSync(oldImage);
                     }
                     req.flash('success', 'با موفقیت ذخیره شد');
@@ -239,20 +262,20 @@ router.post('/post-edit/:postId', upload.single('image'), function (req, res, ne
     });
 });
 
-router.get('/search-post', function(req, res, next){
+router.get('/search-post', function (req, res, next) {
     //TODO: CSRF TOKEN
-    if (req.query.title || req.query.slug || req.query.publish || req.query.editor){
+    if (req.query.title || req.query.slug || req.query.publish || req.query.editor) {
         var query = {};
-        if (req.query.title){
-            query['title'] =  {$regex: req.query.title};
+        if (req.query.title) {
+            query['title'] = {$regex: req.query.title};
         }
-        if (req.query.slug){
-            query['slug'] = { $regex: req.query.slug}
+        if (req.query.slug) {
+            query['slug'] = {$regex: req.query.slug}
         }
-        if (req.query.editor){
+        if (req.query.editor) {
             query['editor'] = req.query.editor;
         }
-        if (req.query.publish){
+        if (req.query.publish) {
             query['publish'] = req.query.publish;
         }
         Post.find(query).populate('user_id').exec(function (err, posts) {
@@ -264,22 +287,22 @@ router.get('/search-post', function(req, res, next){
                         return ++index;
                     },
                     status: function (publish) {
-                        if (publish === 10){
+                        if (publish === 10) {
                             return 'منتشر شده';
-                        }else if(publish === 1){
+                        } else if (publish === 1) {
                             return 'پیش نویس';
-                        }else if(publish === 0){
+                        } else if (publish === 0) {
                             return 'عدم نمایش';
-                        }else{
+                        } else {
                             return 'غیر معتبر';
                         }
                     },
                     selected: function (publish, item) {
-                        if (publish === String(item)){
+                        if (publish === String(item)) {
                             return 'selected';
-                        }else if( publish === String(item)){
+                        } else if (publish === String(item)) {
                             return 'selected';
-                        }else if(publish === String(item)){
+                        } else if (publish === String(item)) {
                             return 'selected';
                         }
                     }
@@ -287,16 +310,16 @@ router.get('/search-post', function(req, res, next){
                 search: req.query
             })
         });
-    }else{
+    } else {
         return res.render('dashboard/posts/search', {title: 'جستجو مطلب'})
     }
 });
 
 router.get('/comments/:id/delete', function (req, res, next) {
     Comments.findByIdAndRemove(req.params.id, function (err, offer) {
-        if (!err && offer){
+        if (!err && offer) {
             req.flash('success', 'با موفقیت حذف شد.');
-        }else{
+        } else {
             req.flash('danger', 'خطا لطفا دوباره تلاش کنید.');
         }
         return res.redirect('/dashboard/comments');
@@ -305,13 +328,15 @@ router.get('/comments/:id/delete', function (req, res, next) {
 
 router.get('/comments/:id/edit', function (req, res, next) {
     Comments.findOne({_id: req.params.id}).populate('post_id').exec(function (err, offer) {
-        if (err){return;}
+        if (err) {
+            return;
+        }
         return res.render('dashboard/comments/edit', {
             title: 'ویرایش نظر',
             comment: offer,
-            helpers:{
+            helpers: {
                 status: function (status, item) {
-                    if (status === item){
+                    if (status === item) {
                         return 'selected';
                     }
                     return '';
@@ -321,22 +346,24 @@ router.get('/comments/:id/edit', function (req, res, next) {
     });
 });
 
-router.post('/comments/:id/edit', function (req, res, next){
+router.post('/comments/:id/edit', function (req, res, next) {
     var array = ['0', '10'];
-    if (array.includes(req.body.status) === false){
+    if (array.includes(req.body.status) === false) {
         req.flash('danger', 'خطا، لطفا دوباره تلاش کنید.');
         return res.redirect('/dashboard/comments');
     }
     Comments.findOne({_id: req.params.id}, function (err, offer) {
-        if (err){return;}
+        if (err) {
+            return;
+        }
         offer.name = req.body.name;
         offer.email = req.body.email;
         offer.body = req.body.comment;
         offer.status = req.body.status;
         offer.save(function (err, result) {
-            if (!err && result){
+            if (!err && result) {
                 req.flash('success', 'با موفقیت ویرایش شد.');
-            }else{
+            } else {
                 req.flash('danger', 'خطا، لطفا دوباره تلاش کنید.');
             }
             res.redirect('/dashboard/comments');
@@ -345,18 +372,18 @@ router.post('/comments/:id/edit', function (req, res, next){
 });
 
 router.get('/comments/search', function (req, res, next) {
-    if(req.query.name || req.query.email || req.query.post || req.query.status){
+    if (req.query.name || req.query.email || req.query.post || req.query.status) {
         var query = {};
-        if (req.query.name){
+        if (req.query.name) {
             query['name'] = {$regex: req.query.name};
         }
-        if (req.query.email){
+        if (req.query.email) {
             query['email'] = {$regex: req.query.email};
         }
-        if (req.query.post){
+        if (req.query.post) {
             query['post_id.title'] = {$regex: req.query.post}
         }
-        if (req.query.status){
+        if (req.query.status) {
             query['status'] = req.query.status;
         }
         Comments.find(query).populate('post_id').exec(function (err, comments) {
@@ -368,13 +395,13 @@ router.get('/comments/search', function (req, res, next) {
                         return ++index;
                     },
                     name: function (status) {
-                        if (status === 10){
+                        if (status === 10) {
                             return 'نمایش';
                         }
                         return 'مخفی';
                     },
                     status: function (status, item) {
-                        if (status === item){
+                        if (status === item) {
                             return 'selected';
                         }
                         return '';
@@ -382,16 +409,16 @@ router.get('/comments/search', function (req, res, next) {
                 }
             });
         });
-    }else{
+    } else {
         return res.render('dashboard/comments/search', {
             title: 'جستجو'
         });
     }
 });
 
-router.get('/comments', function(req, res, next){
+router.get('/comments', function (req, res, next) {
     Comments.find().populate('post_id').sort({'_id': 'descending'}).exec(function (err, comments) {
-        return res.render('dashboard/comments/comments',{
+        return res.render('dashboard/comments/comments', {
             title: 'مدیریت نظرات',
             comments: comments,
             helpers: {
@@ -399,7 +426,7 @@ router.get('/comments', function(req, res, next){
                     return ++index;
                 },
                 name: function (status) {
-                    if (status === 10){
+                    if (status === 10) {
                         return 'نمایش';
                     }
                     return 'مخفی';
@@ -412,18 +439,18 @@ router.get('/comments', function(req, res, next){
 router.get('/categories/view/:id', function (req, res, next) {
     Categories.findById(req.params.id, function (err, offer) {
         //todo: check error ...
-        if (err){
+        if (err) {
             return;
         }
-        if (!offer){
+        if (!offer) {
             return res.redirect(req.header('Referer') || '/dashboard/categories');
         }
         return res.render('dashboard/categories/view', {
             title: ' نمایش ' + offer.name,
             data: offer,
-            helpers:{
+            helpers: {
                 status: function (status) {
-                    if (status === '10'){
+                    if (status === '10') {
                         return 'نمایش';
                     }
                     return 'مخفی';
@@ -438,9 +465,9 @@ router.get('/categories/edit/:id', function (req, res, next) {
         return res.render('dashboard/categories/edit', {
             title: ' ویرایش ' + offer._id,
             data: offer,
-            helpers:{
+            helpers: {
                 select: function (status, item) {
-                    if (status === String(item)){
+                    if (status === String(item)) {
                         return 'selected';
                     }
                     return '';
@@ -458,28 +485,28 @@ router.post('/categories/edit/:id', function (req, res, next) {
         offer.description = req.body.description;
         offer.status = req.body.status;
         var errors = offer.validateSync();
-        if (errors){
+        if (errors) {
             errors = errors.errors;
             var message = [];
-            if (errors.name){
+            if (errors.name) {
                 message.push(errors.name.message);
             }
-            if (errors.slug){
+            if (errors.slug) {
                 message.push(errors.slug.message);
             }
-            if (errors.description){
+            if (errors.description) {
                 message.push(errors.description.message);
             }
-            if (errors.status){
+            if (errors.status) {
                 message.push(errors.status.message);
             }
             return res.render('dashboard/categories/edit', {
                 title: ' ویرایش ' + offer._id,
                 errors: message,
                 data: offer,
-                helpers:{
+                helpers: {
                     select: function (status, item) {
-                        if (status === String(item)){
+                        if (status === String(item)) {
                             return 'selected';
                         }
                         return '';
@@ -489,9 +516,9 @@ router.post('/categories/edit/:id', function (req, res, next) {
         }
         offer.save(function (err, newData) {
             //todo: error check
-            if (!err && newData){
+            if (!err && newData) {
                 req.flash('success', 'با موفقیت تغییرات ذخیره شد.')
-            }else{
+            } else {
                 req.flash('danger', 'خطا، لطفا دوباره تلاش کنید.');
             }
             //todo: check ....
@@ -502,19 +529,19 @@ router.post('/categories/edit/:id', function (req, res, next) {
 
 router.get('/categories/delete/:id', function (req, res, next) {
     Categories.findByIdAndRemove(req.params.id, function (err, offer) {
-        if (!err && offer){
+        if (!err && offer) {
             req.flash('success', 'با موفقیت حذف شد.');
-        }else{
+        } else {
             req.flash('danger', 'خطا لطفا دوباره تلاش کنید.');
         }
         return res.redirect('/dashboard/categories');
-    }) ;
+    });
 });
 
 router.get('/categories/insert', function (req, res, next) {
-   return res.render('dashboard/categories/insert', {
-       title: 'درج دسته بندی جدید'
-   });
+    return res.render('dashboard/categories/insert', {
+        title: 'درج دسته بندی جدید'
+    });
 });
 
 router.post('/categories/insert', function (req, res, next) {
@@ -525,28 +552,28 @@ router.post('/categories/insert', function (req, res, next) {
         status: req.body.status
     });
     var errors = category.validateSync();
-    if(errors){
+    if (errors) {
         errors = errors.errors;
         var message = [];
-        if (errors.name){
+        if (errors.name) {
             message.push(errors.name.message);
         }
-        if (errors.slug){
+        if (errors.slug) {
             message.push(errors.slug.message);
         }
-        if (errors.description){
+        if (errors.description) {
             message.push(errors.description.message);
         }
-        if (errors.status){
+        if (errors.status) {
             message.push(errors.status.message);
         }
         return res.render('dashboard/categories/insert', {
             title: 'درج دسته بندی جدید',
             errors: message,
             data: req.body,
-            helpers:{
+            helpers: {
                 select: function (status, item) {
-                    if (status === String(item)){
+                    if (status === String(item)) {
                         return 'selected';
                     }
                     return '';
@@ -555,48 +582,50 @@ router.post('/categories/insert', function (req, res, next) {
         });
     }
     category.save(function (err, data) {
-       if (err){
-           req.flash('danger', 'خطا، لطفا دوباره تلاش کنید.');
-       }else if(data){
-           req.flash('success', 'با موفقیت ذخیره شد.');
-       }else{
-           req.flash('danger', 'خطا نا شناخته :(');
-       }
-       res.redirect('/dashboard/categories')
+        if (err) {
+            req.flash('danger', 'خطا، لطفا دوباره تلاش کنید.');
+        } else if (data) {
+            req.flash('success', 'با موفقیت ذخیره شد.');
+        } else {
+            req.flash('danger', 'خطا نا شناخته :(');
+        }
+        res.redirect('/dashboard/categories')
     });
 });
 
 router.get('/categories/search', function (req, res, next) {
-    if(req.query.name || req.query.slug || req.query.status){
+    if (req.query.name || req.query.slug || req.query.status) {
         var query = {};
-        if (req.query.name){
-            query['name'] =  {$regex: req.query.name};
+        if (req.query.name) {
+            query['name'] = {$regex: req.query.name};
         }
-        if (req.query.slug){
-            query['slug'] =  {$regex: req.query.slug};
+        if (req.query.slug) {
+            query['slug'] = {$regex: req.query.slug};
         }
-        if (req.query.status){
-            query['status'] =  req.query.status || '0';
+        if (req.query.status) {
+            query['status'] = req.query.status || '0';
         }
         Categories.find(query, function (err, offer) {
             //todo: check error
-            if (err){return;}
+            if (err) {
+                return;
+            }
             return res.render('dashboard/categories/search', {
                 title: 'جستجو',
                 search: req.query,
                 categories: offer,
-                helpers:{
+                helpers: {
                     index: function (index) {
                         return ++index;
                     },
                     selected: function (status, item) {
-                        if (status === String(item)){
+                        if (status === String(item)) {
                             return 'selected';
                         }
                         return '';
                     },
                     status: function (status) {
-                        if (status === '10'){
+                        if (status === '10') {
                             return 'نمایش';
                         }
                         return 'مخفی';
@@ -604,7 +633,7 @@ router.get('/categories/search', function (req, res, next) {
                 }
             });
         });
-    }else{
+    } else {
         return res.render('dashboard/categories/search', {
             title: 'جستجو'
         });
@@ -613,15 +642,15 @@ router.get('/categories/search', function (req, res, next) {
 
 router.get('/categories', function (req, res, next) {
     Categories.find(function (err, data) {
-        return res.render('dashboard/categories/index',{
+        return res.render('dashboard/categories/index', {
             title: 'مدیریت دسته‌بندی ها',
             categories: data,
-            helpers:{
+            helpers: {
                 index: function (index) {
                     return ++index;
                 },
                 status: function (status) {
-                    if (status === '10'){
+                    if (status === '10') {
                         return 'نمایش';
                     }
                     return 'مخفی';
@@ -634,7 +663,7 @@ router.get('/categories', function (req, res, next) {
 
 module.exports = router;
 
-function fileFilter (req, file, cb) {
+function fileFilter(req, file, cb) {
     var filetypes = /jpeg|jpg/;
     var mimetype = filetypes.test(file.mimetype);
     var extname = filetypes.test(path.extname(file.originalname).toLowerCase());
@@ -643,21 +672,21 @@ function fileFilter (req, file, cb) {
     }
     cb(null, false);
 }
-function validateEditPost(req, res, post){
+function validateEditPost(req, res, post) {
     var messages = [];
     req.checkBody('title').notEmpty().withMessage('عنوان نمی تواند خالی باشد.');
     req.checkBody('slug').notEmpty().withMessage('مسیر نمی تواند خالی باشد.');
     req.checkBody('body').notEmpty().withMessage('متن نمی تواند خالی باشد.');
     var errors = req.validationErrors();
-    if (errors){
+    if (errors) {
         errors.forEach(function (item) {
             messages.push(item.msg);
         });
     }
     var array = ['0', '1', '10'];
-    if (array.includes(req.body.publish) === false){
+    if (array.includes(req.body.publish) === false) {
         messages.push('وضعیت غیر معتبر است.');
-    }else{
+    } else {
         post.publish = req.body.publish;
     }
     return messages;
