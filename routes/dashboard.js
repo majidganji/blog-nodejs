@@ -154,7 +154,10 @@ router.get('/post-delete/:postId', function (req, res, next) {
             res.send(false);
         } else {
             fs.unlinkSync('public/images/uploads/' + offer.image);
-            res.send(true);
+            Comments.find({post_id: offer._id}).remove(function (err, remove) {
+                res.send(true);
+
+            });
         }
     });
 });

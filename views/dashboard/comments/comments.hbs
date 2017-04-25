@@ -37,6 +37,10 @@
                             <a href="/dashboard/comments/{{this._id}}/delete" class="text-danger" onclick="return confirm('آیا حذف شود؟')"><span class="fa fa-trash-o"></span></a>
                         </td>
                     </tr>
+                {{else}}
+                    <tr>
+                        <td colspan="7" class="alert-warning">نظر وجود ندارد.</td>
+                    </tr>
                 {{/each}}
             </tbody>
         </table>
