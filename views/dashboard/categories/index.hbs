@@ -1,0 +1,46 @@
+<div class="row">
+    <div class="col-sm-12">
+        <h3>{{title}}</h3>
+        <hr>
+        <a href="/dashboard/categories/insert" class="btn btn-default">درج دسته‌بندی جدید</a>
+        <a href="/dashboard/categories/search" class="btn btn-default">جستجو</a>
+        <p></p>
+    </div>
+</div>
+<p></p>
+<div class="row">
+    <div class="col-sm-12">
+        <table class="table table-responsive">
+            <thead>
+                <tr>
+                    <th class="col-sm-1">&nbsp;</th>
+                    <th>نام</th>
+                    <th>مسیر</th>
+                    <th class="col-sm-1">وضعیت</th>
+                    <th class="col-sm-1"><span class="fa fa-gear"></span></th>
+                </tr>
+            </thead>
+            <tbody>
+            {{#if categories}}
+                {{#each categories}}
+                    <tr>
+                        <td>{{index @index}}</td>
+                        <td>{{this.name}}</td>
+                        <td>{{this.slug}}</td>
+                        <td>{{status this.status}}</td>
+                        <td>
+                            <a title="حذف" href="/dashboard/categories/delete/{{this._id}}" onclick="return confirm('آیا حذف شود؟')" class="text-danger"><span class="fa fa-trash"></span></a>
+                            <a title="ویرایش" href="/dashboard/categories/edit/{{this._id}}" class="text-warning"><span class="fa fa-edit"></span></a>
+                            <a title="نمایش جزئیات" href="/dashboard/categories/view/{{this._id}}" class="text-info"><span class="fa fa-eye"></span></a>
+                        </td>
+                    </tr>
+                {{/each}}
+            {{else}}
+                <tr class="alert-warning">
+                    <td colspan="5">دسته‌بندی وجود ندارد.</td>
+                </tr>
+            {{/if}}
+            </tbody>
+        </table>
+    </div>
+</div>

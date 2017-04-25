@@ -5,6 +5,7 @@ var Post = require('../models/post');
 var path = require('path');
 var fs = require('fs');
 var Comments = require('../models/comment');
+var Categories = require('../models/categories');
 
 var router = express.Router();
 
@@ -246,7 +247,6 @@ router.get('/search-post', function(req, res, next){
             query['title'] =  {$regex: req.query.title};
         }
         if (req.query.slug){
-            // query['slug'] = /req.query.slug/;
             query['slug'] = { $regex: req.query.slug}
         }
         if (req.query.editor){
@@ -299,7 +299,7 @@ router.get('/comments/:id/delete', function (req, res, next) {
         }else{
             req.flash('danger', 'خطا لطفا دوباره تلاش کنید.');
         }
-        return res.redirect(req.header('Referer') || '/dashboard/comments');
+        return res.redirect('/dashboard/comments');
     });
 });
 
@@ -407,6 +407,229 @@ router.get('/comments', function(req, res, next){
             }
         });
     });
+});
+
+router.get('/categories/view/:id', function (req, res, next) {
+    Categories.findById(req.params.id, function (err, offer) {
+        //todo: check error ...
+        if (err){
+            return;
+        }
+        if (!offer){
+            return res.redirect(req.header('Referer') || '/dashboard/categories');
+        }
+        return res.render('dashboard/categories/view', {
+            title: ' نمایش ' + offer.name,
+            data: offer,
+            helpers:{
+                status: function (status) {
+                    if (status === '10'){
+                        return 'نمایش';
+                    }
+                    return 'مخفی';
+                }
+            }
+        })
+    });
+});
+
+router.get('/categories/edit/:id', function (req, res, next) {
+    Categories.findById(req.params.id, function (err, offer) {
+        return res.render('dashboard/categories/edit', {
+            title: ' ویرایش ' + offer._id,
+            data: offer,
+            helpers:{
+                select: function (status, item) {
+                    if (status === String(item)){
+                        return 'selected';
+                    }
+                    return '';
+                }
+            }
+        })
+    });
+});
+
+router.post('/categories/edit/:id', function (req, res, next) {
+    Categories.findById(req.params.id, function (err, offer) {
+        //todo: check error ...
+        offer.name = req.body.name;
+        offer.slug = req.body.slug;
+        offer.description = req.body.description;
+        offer.status = req.body.status;
+        var errors = offer.validateSync();
+        if (errors){
+            errors = errors.errors;
+            var message = [];
+            if (errors.name){
+                message.push(errors.name.message);
+            }
+            if (errors.slug){
+                message.push(errors.slug.message);
+            }
+            if (errors.description){
+                message.push(errors.description.message);
+            }
+            if (errors.status){
+                message.push(errors.status.message);
+            }
+            return res.render('dashboard/categories/edit', {
+                title: ' ویرایش ' + offer._id,
+                errors: message,
+                data: offer,
+                helpers:{
+                    select: function (status, item) {
+                        if (status === String(item)){
+                            return 'selected';
+                        }
+                        return '';
+                    }
+                }
+            });
+        }
+        offer.save(function (err, newData) {
+            //todo: error check
+            if (!err && newData){
+                req.flash('success', 'با موفقیت تغییرات ذخیره شد.')
+            }else{
+                req.flash('danger', 'خطا، لطفا دوباره تلاش کنید.');
+            }
+            //todo: check ....
+            res.redirect(req.header('Referer') || '/dashboard/categories');
+        })
+    });
+});
+
+router.get('/categories/delete/:id', function (req, res, next) {
+    Categories.findByIdAndRemove(req.params.id, function (err, offer) {
+        if (!err && offer){
+            req.flash('success', 'با موفقیت حذف شد.');
+        }else{
+            req.flash('danger', 'خطا لطفا دوباره تلاش کنید.');
+        }
+        return res.redirect('/dashboard/categories');
+    }) ;
+});
+
+router.get('/categories/insert', function (req, res, next) {
+   return res.render('dashboard/categories/insert', {
+       title: 'درج دسته بندی جدید'
+   });
+});
+
+router.post('/categories/insert', function (req, res, next) {
+    var category = new Categories({
+        name: req.body.name,
+        slug: req.body.slug,
+        description: req.body.description,
+        status: req.body.status
+    });
+    var errors = category.validateSync();
+    if(errors){
+        errors = errors.errors;
+        var message = [];
+        if (errors.name){
+            message.push(errors.name.message);
+        }
+        if (errors.slug){
+            message.push(errors.slug.message);
+        }
+        if (errors.description){
+            message.push(errors.description.message);
+        }
+        if (errors.status){
+            message.push(errors.status.message);
+        }
+        return res.render('dashboard/categories/insert', {
+            title: 'درج دسته بندی جدید',
+            errors: message,
+            data: req.body,
+            helpers:{
+                select: function (status, item) {
+                    if (status === String(item)){
+                        return 'selected';
+                    }
+                    return '';
+                }
+            }
+        });
+    }
+    category.save(function (err, data) {
+       if (err){
+           req.flash('danger', 'خطا، لطفا دوباره تلاش کنید.');
+       }else if(data){
+           req.flash('success', 'با موفقیت ذخیره شد.');
+       }else{
+           req.flash('danger', 'خطا نا شناخته :(');
+       }
+       res.redirect('/dashboard/categories')
+    });
+});
+
+router.get('/categories/search', function (req, res, next) {
+    if(req.query.name || req.query.slug || req.query.status){
+        var query = {};
+        if (req.query.name){
+            query['name'] =  {$regex: req.query.name};
+        }
+        if (req.query.slug){
+            query['slug'] =  {$regex: req.query.slug};
+        }
+        if (req.query.status){
+            query['status'] =  req.query.status || '0';
+        }
+        Categories.find(query, function (err, offer) {
+            //todo: check error
+            if (err){return;}
+            return res.render('dashboard/categories/search', {
+                title: 'جستجو',
+                search: req.query,
+                categories: offer,
+                helpers:{
+                    index: function (index) {
+                        return ++index;
+                    },
+                    selected: function (status, item) {
+                        if (status === String(item)){
+                            return 'selected';
+                        }
+                        return '';
+                    },
+                    status: function (status) {
+                        if (status === '10'){
+                            return 'نمایش';
+                        }
+                        return 'مخفی';
+                    }
+                }
+            });
+        });
+    }else{
+        return res.render('dashboard/categories/search', {
+            title: 'جستجو'
+        });
+    }
+});
+
+router.get('/categories', function (req, res, next) {
+    Categories.find(function (err, data) {
+        return res.render('dashboard/categories/index',{
+            title: 'مدیریت دسته‌بندی ها',
+            categories: data,
+            helpers:{
+                index: function (index) {
+                    return ++index;
+                },
+                status: function (status) {
+                    if (status === '10'){
+                        return 'نمایش';
+                    }
+                    return 'مخفی';
+                }
+            }
+        });
+    });
+
 });
 
 module.exports = router;

@@ -1,0 +1,66 @@
+<div class="row">
+    <div class="col-sm-12">
+        <h3>{{title}}</h3>
+        <hr>
+    </div>
+</div>
+<p></p>
+<div class="row">
+    <div class="col-sm-12">
+        <form action="/dashboard/categories/search" method="get">
+            <div class="form-group">
+                <label for="name">نام</label>
+                <input type="text" name="name" id="name" class="form-control" value="{{search.name}}">
+            </div>
+            <div class="form-group">
+                <label for="slug">مسیر</label>
+                <input type="text" name="slug" id="slug" class="form-control" value="{{search.slug}}">
+            </div>
+            <div class="form-group">
+                <label for="status">وضعیت</label>
+                <select name="status" id="status" class="form-control form-control-select">
+                    <option value=""></option>
+                    <option {{#if search}}{{selected search.status 10}}{{/if}} value="10">نمایش</option>
+                    <option {{#if search}}{{selected search.status 0}}{{/if}} value="0">مخفی</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-default">جستجو</button>
+                <a href="/dashboard/categories" class="btn btn-default">لفو</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{#if categories}}
+    <div class="row">
+        <div class="col-sm-12">
+            <table class="table table-responsive">
+                <thead>
+                <tr>
+                    <th class="col-sm-1">&nbsp;</th>
+                    <th>نام</th>
+                    <th>مسیر</th>
+                    <th class="col-sm-1">وضعیت</th>
+                    <th class="col-sm-1"><span class="fa fa-gear"></span></th>
+                </tr>
+                </thead>
+                <tbody>
+                {{#each categories}}
+                    <tr>
+                        <td>{{index @index}}</td>
+                        <td>{{this.name}}</td>
+                        <td>{{this.slug}}</td>
+                        <td>{{status this.status}}</td>
+                        <td>
+                            <a title="حذف" href="/dashboard/categories/delete/{{this._id}}" onclick="return confirm('آیا حذف شود؟')" class="text-danger"><span class="fa fa-trash"></span></a>
+                            <a title="ویرایش" href="/dashboard/categories/edit/{{this._id}}" class="text-warning"><span class="fa fa-edit"></span></a>
+                            <a title="نمایش جزئیات" href="/dashboard/categories/view/{{this._id}}" class="text-info"><span class="fa fa-eye"></span></a>
+                        </td>
+                    </tr>
+                {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{{/if}}

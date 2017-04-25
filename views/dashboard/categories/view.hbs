@@ -1,0 +1,33 @@
+<div class="row">
+    <div class="col-sm-12">
+        <h3>{{title}}</h3>
+        <hr>
+        <a title="حذف" href="/dashboard/categories/delete/{{data._id}}" onclick="return confirm('آیا حذف شود؟')" class="btn btn-danger">حذف</a>
+        <a title="ویرایش" href="/dashboard/categories/edit/{{data._id}}" class="btn btn-warning">ویرایش</a>
+        <p></p>
+    </div>
+</div>
+<p></p>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <label for="name">نام</label>
+            <input class="form-control" type="text" id="name" disabled="disabled" value="{{data.name}}">
+        </div>
+        <div class="form-group">
+            <label for="slug">مسیر</label>
+            <input class="form-control" type="text" id="slug" disabled="disabled" value="{{data.slug}}">
+        </div>
+        <div class="form-group">
+            <label for="description">توضیحات</label>
+            <textarea class="form-control" id="description" disabled="disabled" rows="10">{{data.description}}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="status">وضعیت</label>
+            <select class="disabled form-control form-control-select" disabled id="status">
+                <option value="">{{status data.status}}</option>
+            </select>
+
+        </div>
+    </div>
+</div>

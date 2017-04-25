@@ -1,0 +1,49 @@
+<div class="row">
+    <div class="col-sm-12">
+        <h3>{{title}}</h3>
+        <hr>
+    </div>
+</div>
+
+{{#if errors}}
+    <div class="row">
+        <div class="col-sm-12 alert alert-danger">
+            <ul>
+                {{#each errors}}
+                    <li>{{this}}</li>
+                {{/each}}
+            </ul>
+        </div>
+    </div>
+{{/if}}
+
+<div class="row">
+    <div class="col-sm-12">
+        <form action="/dashboard/categories/insert" method="post">
+            <div class="form-group">
+                <label for="name">نام</label>
+                <input type="text" id="name" name="name" class="form-control" value="{{data.name}}">
+            </div>
+            <div class="form-group">
+                <label for="slug">مسیر</label>
+                <p class="text-muted paddingright15px text-description"><span class="fa fa-info"></span>  مسیر نام انگلیسی و یکتا  برای پیدا کردن دسته‌بندی مورد نظر است، که در Url بالای صفحه درج می‌شود.</p>
+                <input type="text" id="slug" name="slug" class="form-control text-direction-ltr" value="{{data.slug}}">
+            </div>
+            <div class="form-group">
+                <label for="description">توضیحات</label>
+                <textarea id="description" rows="10" name="description" class="form-control">{{data.description}}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="status">وضعیت</label>
+                <select name="status" id="status" class="form-control form-control-select">
+                    <option {{#if data}}{{select data.status 10}}{{/if}} value="10">نمایش</option>
+                    <option {{#if data}}{{select data.status 0}}{{/if}} value="0">مخفی</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-success">ذخیره</button>
+                <button type="reset" class="btn btn-default">لفو</button>
+            </div>
+        </form>
+    </div>
+</div>

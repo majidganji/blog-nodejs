@@ -56,3 +56,7 @@ body{
     content: '';
     margin-bottom: 30px;
 }
+
+.form-control-select{
+    height: 40px;
+}
