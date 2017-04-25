@@ -20,6 +20,14 @@
                 <input type="text" id="post" name="post" class="form-control">
             </div>
             <div class="form-group">
+                <label for="status">وضعیت</label>
+                <select name="status" id="status">
+                    <option value=""></option>
+                    <option value="10">نمایش بده</option>
+                    <option value="0">عدم نمایش</option>
+                </select>
+            </div>
+            <div class="form-group">
                 <button class="btn btn-success" type="submit">جستجو</button>
                 <button class="btn btn-default" type="reset">لغو</button>
             </div>
@@ -39,6 +47,7 @@
                     <th>ایمیل</th>
                     <th>مطلب</th>
                     <th>مشاهده</th>
+                    <th>وضعیت</th>
                     <th class="col-sm-1"><span class="fa fa-gear"></span></th>
                 </tr>
                 </thead>
@@ -50,6 +59,7 @@
                         <td>{{this.email}}</td>
                         <td><a target="_blank" href="/post/{{this.post_id.slug}}">{{this.post_id.title}}</a></td>
                         <td><a target="_blank" href="/post/{{this.post_id.slug}}#{{this._id}}"><span class="fa fa-eye"></span>&nbsp;لینک نظر</a></td>
+                        <td>{{name this.status}}</td>
                         <td>
                             <a href="/dashboard/comments/{{this._id}}/edit" class="text-warning"><span class="fa fa-edit"></span></a>
                             &nbsp;

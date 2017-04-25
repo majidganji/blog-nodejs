@@ -7,6 +7,7 @@ var comment = new Schema({
     name: {type: String, required: true},
     email: {type: String, required: true},
     body: {type: String, requried: true},
+    status: {type: Number, required: true},
     time: {type: Number, required: true}
 });
 

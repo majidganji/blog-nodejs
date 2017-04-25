@@ -31,7 +31,7 @@ router.get('/post/:slug', function (req, res, next) {
             res.render('error',{error: {status: 404, stack: 'Not Found ' + req.params.slug}, message: 'Not Found Post', layout: '404'});
             return;
         }
-        comment.find({post_id: post._id}).exec(function (err, comments) {
+        comment.find({post_id: post._id, status: 10}).exec(function (err, comments) {
             //TODO: handel error ...
             if (err){}
             res.render('index/post', {
@@ -69,6 +69,7 @@ router.post('/new-comment', function (req, res, next) {
         name: req.body.name,
         email: req.body.email,
         body: req.body.comment,
+        status: 10,
         time: +Date.now()
     });
 

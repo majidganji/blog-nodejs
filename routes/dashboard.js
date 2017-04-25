@@ -308,17 +308,31 @@ router.get('/comments/:id/edit', function (req, res, next) {
         if (err){return;}
         return res.render('dashboard/comments/edit', {
             title: 'ویرایش نظر',
-            comment: offer
+            comment: offer,
+            helpers:{
+                status: function (status, item) {
+                    if (status === item){
+                        return 'selected';
+                    }
+                    return '';
+                }
+            }
         });
     });
 });
 
 router.post('/comments/:id/edit', function (req, res, next){
+    var array = ['0', '10'];
+    if (array.includes(req.body.status) === false){
+        req.flash('danger', 'خطا، لطفا دوباره تلاش کنید.');
+        return res.redirect('/dashboard/comments');
+    }
     Comments.findOne({_id: req.params.id}, function (err, offer) {
         if (err){return;}
         offer.name = req.body.name;
         offer.email = req.body.email;
         offer.body = req.body.comment;
+        offer.status = req.body.status;
         offer.save(function (err, result) {
             if (!err && result){
                 req.flash('success', 'با موفقیت ویرایش شد.');
@@ -331,7 +345,7 @@ router.post('/comments/:id/edit', function (req, res, next){
 });
 
 router.get('/comments/search', function (req, res, next) {
-    if(req.query.name || req.query.email || req.query.post){
+    if(req.query.name || req.query.email || req.query.post || req.query.status){
         var query = {};
         if (req.query.name){
             query['name'] = {$regex: req.query.name};
@@ -342,6 +356,9 @@ router.get('/comments/search', function (req, res, next) {
         if (req.query.post){
             query['post_id.title'] = {$regex: req.query.post}
         }
+        if (req.query.status){
+            query['status'] = req.query.status;
+        }
         Comments.find(query).populate('post_id').exec(function (err, comments) {
             res.render('dashboard/comments/search', {
                 title: 'جستجو',
@@ -349,6 +366,18 @@ router.get('/comments/search', function (req, res, next) {
                 helpers: {
                     index: function (index) {
                         return ++index;
+                    },
+                    name: function (status) {
+                        if (status === 10){
+                            return 'نمایش';
+                        }
+                        return 'مخفی';
+                    },
+                    status: function (status, item) {
+                        if (status === item){
+                            return 'selected';
+                        }
+                        return '';
                     }
                 }
             });
@@ -368,6 +397,12 @@ router.get('/comments', function(req, res, next){
             helpers: {
                 index: function (index) {
                     return ++index;
+                },
+                name: function (status) {
+                    if (status === 10){
+                        return 'نمایش';
+                    }
+                    return 'مخفی';
                 }
             }
         });
