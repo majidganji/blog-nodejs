@@ -1,14 +1,19 @@
 var express = require('express');
 var router = express.Router();
 var Post = require('../models/post');
+var categories = require('../models/categories');
 var Admin = require('../models/admin');
 var comment = require('../models/comment');
 var moment = require('moment-jalaali');
 
 
+
 router.use(function (req, res, next) {
     req.app.locals.layout = 'layout';
-    next();
+    categories.find({status: '10'}, function (err, offer) {
+        res.locals.categories = offer;
+        next();
+    });
 });
 
 router.get('/', function(req, res, next) {
@@ -82,6 +87,22 @@ router.post('/new-comment', function (req, res, next) {
         if (err){}
         res.send(true);
     })
+});
+
+router.get('/category/:slug', function (req, res, next) {
+    categories.findOne({slug: req.params.slug}, function (err, category) {
+        //todo: check error
+        if(err || !category){
+            return;
+        }
+        console.log(category);
+        Post.find({category_id: category._id}, function (err, post) {
+            return res.render('index/category', {
+                title: ' دسته‌بندی ' + category.name,
+                posts: post
+            });
+        })
+    });
 });
 
 module.exports = router;

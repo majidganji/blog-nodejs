@@ -1,0 +1,28 @@
+<div class="row">
+    <div class="col-sm-12">
+        <h3>{{title}}</h3>
+        <hr>
+    </div>
+</div>
+{{#each posts}}
+    <div class="row">
+        <div class="col-xs-12 posts">
+            <div class="thumbnail">
+                <img src="/images/uploads/{{this.image}}" alt="{{this.title}}">
+                <div class="caption">
+                    <a href="/post/{{this.slug}}"><h3>{{this.title}}</h3></a>
+                    <p>{{{this.body}}}</p>
+                    <p><a href="/post/{{this.slug}}" class="btn btn-default">ادامه مطلب</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+{{else}}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="alert alert-warning">
+                مطلبی در این دسته‌بندی وجود ندارد.
+            </div>
+        </div>
+    </div>
+{{/each}}

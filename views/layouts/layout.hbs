@@ -27,12 +27,15 @@
                 <div class="panel panel-primary">
                     <div class="panel-heading">دسته بندی ها</div>
                     <div class="list-group">
-                        <a href="#" class="list-group-item">آموزشی</a>
-                        <a href="#" class="list-group-item">دیدنی</a>
-                        <a href="#" class="list-group-item">دیدنی</a>
-                        <a href="#" class="list-group-item">دیدنی</a>
-                        <a href="#" class="list-group-item">دیدنی</a>
-                        <a href="#" class="list-group-item">دیدنی</a>
+                        {{#each categories}}
+                            <a href="/category/{{this.slug}}" class="list-group-item">{{this.name}}</a>
+                        {{/each}}
+                        <!--<a href="#" class="list-group-item">آموزشی</a>-->
+                        <!--<a href="#" class="list-group-item">دیدنی</a>-->
+                        <!--<a href="#" class="list-group-item">دیدنی</a>-->
+                        <!--<a href="#" class="list-group-item">دیدنی</a>-->
+                        <!--<a href="#" class="list-group-item">دیدنی</a>-->
+                        <!--<a href="#" class="list-group-item">دیدنی</a>-->
                     </div>
                 </div>
             </div>
