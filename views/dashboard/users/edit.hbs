@@ -1,0 +1,57 @@
+<div class="row">
+    <div class="col-md-6 col-md-offset-3">
+        <h3>{{title}}</h3>
+        <hr>
+    </div>
+</div>
+
+{{#if message}}
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="alert alert-danger">
+                <ul>
+                    {{#each message}}
+                        <li>{{this}}</li>
+                    {{/each}}
+                </ul>
+            </div>
+        </div>
+    </div>
+{{/if}}
+
+<div class="row">
+    <div class="col-md-6 col-md-offset-3">
+        <form action="/dashboard/users/edit/{{user._id}}" method="post">
+            <div class="form-group">
+                <label for="name">نام</label>
+                <input type="text" class="form-control" name="name" id="name" value="{{user.name}}">
+            </div>
+            <div class="form-group">
+                <label for="username">نام کاربری</label>
+                <input type="text" class="form-control" name="username" id="username" value="{{user.username}}">
+            </div>
+            <div class="form-group">
+                <label for="email">پست الکترونیکی</label>
+                <input type="text" class="form-control text-direction-ltr" name="email" id="email" value="{{user.email}}">
+            </div>
+            <div class="form-group">
+                <label for="status">وضعیت</label>
+                <select name="status" id="status" class="form-control form-control-select">
+                    <option value="10">مدیرکل</option>
+                    <option value="9">مدیر</option>
+                    <option value="1">نویسنده</option>
+                    <option value="0">غیر فعال</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="password">رمز عبور</label>
+                <p class="text-muted text-description paddingright15px"><span class="fa fa-lg fa-info-circle"></span>&nbsp; در صورت خالی ماندن این فیلد، رمز عبور تغییر نمی کند.</p>
+                <input type="text" class="form-control" name="password" id="password">
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-success">ذخیره</button>
+                <button type="reset" class="btn btn-default">لغو</button>
+            </div>
+        </form>
+    </div>
+</div>

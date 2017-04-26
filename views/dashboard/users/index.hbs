@@ -1,0 +1,42 @@
+<div class="row">
+    <div class="col-ms-12">
+        <h3>{{title}}</h3>
+        <hr>
+        <a href="/dashboard/users/insert" class="btn btn-default">کاربر جدید</a>
+        <a href="/dashboard/users/search" class="btn btn-default">جستجو</a>
+        <p></p>
+    </div>
+</div>
+<p></p>
+<div class="row">
+    <div class="col-sm-12">
+        <table class="table table-responsive">
+            <thead>
+                <tr>
+                    <th>&nbsp;</th>
+                    <th>نام</th>
+                    <th>نام کاربری</th>
+                    <th>پست الکترونیکی</th>
+                    <th>وضعیت</th>
+                    <th><span class="fa fa-gear"></span></th>
+                </tr>
+            </thead>
+            <tbody>
+            {{#each users}}
+                <tr>
+                    <td>{{index @index}}</td>
+                    <td>{{this.name}}</td>
+                    <td>{{this.username}}</td>
+                    <td>{{this.email}}</td>
+                    <td>{{status this.status}}</td>
+                    <td>
+                        <a href="/dashboard/users/delete/{{this._id}}" class="text-danger" onclick="return confirm('آیا حذف شود؟')"><span class="fa fa-trash"></span></a>
+                        <a href="/dashboard/users/edit/{{this._id}}" class="text-warning"><span class="fa fa-edit"></span></a>
+                        <a href="/dashboard/users/view/{{this._id}}" class="text-info"><span class="fa fa-eye"></span></a>
+                    </td>
+                </tr>
+            {{/each}}
+            </tbody>
+        </table>
+    </div>
+</div>

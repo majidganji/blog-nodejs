@@ -6,6 +6,7 @@ var path = require('path');
 var fs = require('fs');
 var Comments = require('../models/comment');
 var Categories = require('../models/categories');
+var users = require('../models/admin');
 
 var router = express.Router();
 
@@ -37,6 +38,12 @@ router.use(function (req, res, next) {
 router.get('/index', function (req, res, next) {
     res.render('dashboard/index');
 });
+
+/**
+ *
+ * Posts
+ *
+ */
 
 router.get('/new-post', function (req, res, next) {
     var message = req.flash('error');
@@ -318,6 +325,12 @@ router.get('/search-post', function (req, res, next) {
     }
 });
 
+/**
+ *
+ * Comments
+ *
+ */
+
 router.get('/comments/:id/delete', function (req, res, next) {
     Comments.findByIdAndRemove(req.params.id, function (err, offer) {
         if (!err && offer) {
@@ -438,6 +451,12 @@ router.get('/comments', function (req, res, next) {
         });
     });
 });
+
+/**
+ *
+ * Categories
+ *
+ */
 
 router.get('/categories/view/:id', function (req, res, next) {
     Categories.findById(req.params.id, function (err, offer) {
@@ -664,6 +683,255 @@ router.get('/categories', function (req, res, next) {
 
 });
 
+/**
+ *
+ * Users
+ *
+ */
+
+router.get('/users', function (req, res, next) {
+    users.find(function (err, users) {
+        res.render('dashboard/users/index',{
+            title: 'مدیریت کاربران',
+            users: users,
+            helpers: {
+                index: function (index) {
+                    return ++index;
+                },
+                status: function (status) {
+                    status = String(status);
+                    if (status === '10'){
+                        return 'مدیر کل';
+                    }else if(status === '9'){
+                        return 'مدیر';
+                    }else if(status === '1'){
+                        return 'نویسنده';
+                    }else{
+                        return 'غیر فعال';
+                    }
+                }
+            }
+        });
+    });
+});
+
+router.get('/users/delete/:id', function (req, res, next) {
+    users.findByIdAndRemove(req.params.id, function (err, offer) {
+        //todo: check err not found
+        if (err && !offer){
+            req.flash('danger', 'خطا، لطفا دوباره تلاش کنید.');
+        }else{
+            req.flash('success', 'با موفقیت حذف شد.');
+            if(offer._id === req.user._id){
+                return res.redirect('/admin/logout');
+            }
+        }
+        return res.redirect('/dashboard/users');
+    })
+});
+
+router.get('/users/edit/:id', function (req, res, next) {
+    users.findById(req.params.id, function (err, offer) {
+         return res.render('dashboard/users/edit', {
+             title: ' ویرایش ' + offer.name,
+             user: offer
+         });
+    });
+});
+
+router.post('/users/edit/:id', function (req, res, next) {
+    users.findById(req.params.id, function (err, offer) {
+        if (err){
+            req.flash('danger', 'خطا دوباه تلاش کنید.');
+            res.redirect('/dashboard/users');
+        }
+        offer.name = req.body.name;
+        offer.username = req.body.username;
+        offer.email = req.body.email;
+        offer.status = req.body.status;
+        if(req.body.password){
+            offer.password = (new users).encryptPassword(req.body.password);
+        }
+        var errors = offer.validateSync();
+        if (errors){
+            errors = errors.errors;
+            var message = [];
+            if (errors.name){
+                message.push(errors.name.message);
+            }
+            if (errors.username){
+                message.push(errors.username.message);
+            }
+            if (errors.email){
+                message.push(errors.email.message);
+            }
+            if (errors.status){
+                message.push(errors.status.message);
+            }
+            if (errors.password){
+                message.push(errors.password.message);
+            }
+            return res.render('dashboard/users/edit', {
+                title: ' ویرایش ' + offer.name,
+                user: offer,
+                message: message
+            });
+        }else{
+            var id = offer._id;
+            offer.save(function (err, newDate) {
+                if(!err){
+                    req.flash('success', 'باموفقیت ذخیره شد.');
+                    if(id === req.user._id){
+                        console.log('-------------------');
+                        return res.redirect('/admin/logout');
+                    }
+                }else {
+                    req.flash('danger', 'خطا دوباره تلاش کنید.');
+                }
+                return res.redirect('/dashboard/users');
+            });
+        }
+    });
+});
+
+router.get('/users/view/:id', function (req, res, next) {
+    users.findById(req.params.id, function (err, user) {
+        return res.render('dashboard/users/view', {
+            title: ' مشخصات ' + user.name,
+            user: user,
+            helpers: {
+                selected: function (status, item) {
+                    if (status === String(item)){
+                        return 'selected';
+                    }
+                    return '';
+                }
+            }
+        });
+    });
+});
+
+router.get('/users/search', function (req, res, next) {
+    if(req.query.name || req.query.username || req.query.email || req.query.status){
+        var query = {};
+        if (req.query.name){
+            query['name'] = {$regex: req.query.name};
+        }
+        if (req.query.username){
+            query['username'] = req.query.username;
+        }
+        if (req.query.email){
+            query['email'] = req.query.email;
+        }
+        if (req.query.status){
+            query['status'] = req.query.status;
+        }
+        users.find(query, function (err, users) {
+            return res.render('dashboard/users/search', {
+                title: 'جستجو',
+                data: req.query,
+                users: users,
+                helpers: {
+                    index: function (index) {
+                        return ++index;
+                    },
+                    selected: function (status, item) {
+                        if (status === String(item)){
+                            return 'selected';
+                        }
+                        return '';
+                    },
+                    status: function (status) {
+                        status = String(status);
+                        if (status === '10'){
+                            return 'مدیر کل';
+                        }else if(status === '9'){
+                            return 'مدیر';
+                        }else if(status === '1'){
+                            return 'نویسنده';
+                        }else{
+                            return 'غیر فعال';
+                        }
+                    }
+                }
+            });
+        });
+    }else{
+        return res.render('dashboard/users/search', {
+            title: 'جستجو',
+            helpers: {
+                selected: function (status, item) {
+                    if (status === String(item)){
+                        return 'selected';
+                    }
+                    return '';
+                }
+            }
+        });
+    }
+});
+
+router.get('/users/insert', function (req, res, next) {
+    return res.render('dashboard/users/insert',{
+        title: 'درج کاربر جدید'
+    });
+});
+
+router.post('/users/insert', function (req, res, next) {
+    var user = new users({
+        name : req.body.name,
+        username : req.body.username,
+        email : req.body.email,
+        status : req.body.status,
+        password : req.body.password
+    });
+
+    var errors = user.validateSync();
+    console.log(errors);
+    if (errors){
+        errors = errors.errors;
+        var message = [];
+        if (errors.name){
+            message.push(errors.name.message);
+        }
+        if (errors.username){
+            message.push(errors.username.message);
+        }
+        if (errors.email){
+            message.push(errors.email.message);
+        }
+        if (errors.status){
+            message.push(errors.status.message);
+        }
+        if (errors.password){
+            message.push(errors.password.message);
+        }
+        return res.render('dashboard/users/insert',{
+            title: 'درج کاربر جدید',
+            message: message,
+            old: req.body,
+            helpers: {
+                selected: function (status, item) {
+                    if (status === String(item)){
+                        return 'selected';
+                    }
+                    return '';
+                }
+            }
+        });
+    }else{
+        user.password = user.encryptPassword(user.password);
+        user.save(function (err, done) {
+            if(!err && done){
+                req.flash('success', 'با موفقیت ذخیره شد.');
+            }else{
+                req.flash('danger', 'خطا، لطفا دوباره تلاش کنید.');
+            }
+            return res.redirect('/dashboard/users');
+        });
+    }
+});
+
 module.exports = router;
 
 function fileFilter(req, file, cb) {
@@ -675,6 +943,7 @@ function fileFilter(req, file, cb) {
     }
     cb(null, false);
 }
+
 function validateEditPost(req, res, post) {
     var messages = [];
     req.checkBody('title').notEmpty().withMessage('عنوان نمی تواند خالی باشد.');
