@@ -734,7 +734,12 @@ router.get('/users/edit/:id', function (req, res, next) {
     users.findById(req.params.id, function (err, offer) {
          return res.render('dashboard/users/edit', {
              title: ' ویرایش ' + offer.name,
-             user: offer
+             user: offer,
+             helpers:{
+                 selected: function (status, item) {
+                     return ((status === String(item)) ? 'selected' : '');
+                 }
+             }
          });
     });
 });
@@ -774,7 +779,12 @@ router.post('/users/edit/:id', function (req, res, next) {
             return res.render('dashboard/users/edit', {
                 title: ' ویرایش ' + offer.name,
                 user: offer,
-                message: message
+                message: message,
+                helpers:{
+                    selected: function (status, item) {
+                        return ((status === String(item)) ? 'selected' : '');
+                    }
+                }
             });
         }else{
             var id = offer._id;

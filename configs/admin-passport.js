@@ -27,7 +27,7 @@ passport.use('local.login', new LocalStrategy({
         });
         return done(null, false, req.flash('error', messages));
     }
-    Admin.findOne({username: username}, function (err, user) {
+    Admin.findOne({username: username, status:{$ne: '0'}}, function (err, user) {
         if(err){
             return done(err);
         }
