@@ -2,9 +2,15 @@
     margin-left: 0 !important;
     margin-right: 0 !important;
 }
+/*@font-face {*/
+    /*font-family: 'isans';*/
+    /*src: url('../fonts/iransans/IRANSANSExpanded.eot?#') format('eot'),  !* IE6–8 *! url('../fonts/iransans/IRANSans-Bold.woff2') format('woff2'),  !* Chrome36+, Opera24+*! url('../fonts/iransans/IRANSans-Bold.woff') format('woff');  !* FF3.6+, IE9, Chrome6+, Saf5.1+*!*/
+    /*font-weight: bold;*/
+    /*font-style: normal;*/
+/*}*/
 @font-face {
     font-family: 'isans';
-    src: url('../fonts/iransans/IRANSANSExpanded.eot?#') format('eot'),  /* IE6–8 */ url('../fonts/iransans/IRANSans-Bold.woff2') format('woff2'),  /* Chrome36+, Opera24+*/ url('../fonts/iransans/IRANSans-Bold.woff') format('woff');  /* FF3.6+, IE9, Chrome6+, Saf5.1+*/
+    src: url('../fonts/yekan/BYekan-webfont.eot?#') format('eot'),  /* IE6–8 */ url('../fonts/yekan/BYekan-webfont.woff2') format('woff2'),  /* Chrome36+, Opera24+*/ url('../fonts/yekan/BYekan-webfont.woff') format('woff');  /* FF3.6+, IE9, Chrome6+, Saf5.1+*/
     font-weight: bold;
     font-style: normal;
 }
